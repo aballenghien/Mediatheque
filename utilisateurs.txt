@@ -1,0 +1,7 @@
+Nom<Delahaye> ; Prenom<Benoit> ; Identifiant<bdelahay>
+Nom<Haddock> ; Prenom<Archibald> ; Identifiant<bachibouzouk> ; Admin<OUI>
+Nom<Tournesol> ; Prenom<Tryphon> ; Identifiant<trytour>
+Nom<Bolivar> ; Prenom<Anatole> ; Identifiant<anabol> ; Admin<OUI>
+Nom<Haddock> ; Prenom<Colin> ; Identifiant<colhad>
+Nom<Bocasa> ; Prenom<Tryphon> ; Identifiant<trybo>
+Nom<Patacaisse> ; Prenom<Babar> ; Identifiant<babapa>
