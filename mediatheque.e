@@ -4,27 +4,36 @@ creation{ANY}
 	make
 
 feature{}
-	lst_user: ARRAY[UTILISATEUR] -- liste des utilisateurs
-  	lst_media: ARRAY[MEDIA] -- liste des medias
- -- 	lst_acteurs: ARRAY[ACTEUR] --liste des acteurs
- -- 	lst_realisateurs: ARRAY[REALISATEUR] --liste des réalisateurs
+	lst_users: ARRAY[UTILISATEUR] -- liste des utilisateurs
+  	lst_medias: ARRAY[MEDIA] -- liste des medias
+ 	lst_acteurs: ARRAY[ACTEUR] --liste des acteurs
+ 	lst_realisateurs: ARRAY[REALISATEUR] --liste des réalisateurs
   	lst_auteurs: ARRAY[AUTEUR] -- liste des auteurs
+  	lst_livres: ARRAY[LIVRE]
+  	lst_dvd : ARRAY[DVD]
 
 feature{ANY}
 	make is
 		do
-			create lst_user.with_capacity(1, 0)
-			create lst_media.with_capacity(1,0)
+			create lst_users.with_capacity(1, 0)
+			create lst_medias.with_capacity(1,0)
 			create lst_auteurs.with_capacity(1,0)
-			remplir_lst_user
-			afficher_tableau_user
-			remplir_lst_media
-			afficher_tableau_media
-			remplir_lst_realisateur_acteurs_auteurs
+			create lst_acteurs.with_capacity(1,0)
+			create lst_realisateurs.with_capacity(1,0)
+			create lst_livres.with_capacity(1,0)
+			create lst_dvd.with_capacity(1,0)
+			remplir_lst_users
+		--	afficher_tableau_user
+			remplir_lst_medias
+		--	afficher_tableau_media
+			remplir_lst_auteurs_realisateurs_acteurs
 			afficher_tableau_auteurs
+			afficher_tableau_acteurs
+			afficher_tableau_realisateurs
 		end
-	
-	remplir_lst_user is
+
+--récupère tous les utilisateurs dans le fichier
+	remplir_lst_users is
 		local
 			ligne: STRING -- ligne du fichier utilisateur
 			fichier: TEXT_FILE_READ -- Fichier utilisateur ouvert en lecture
@@ -90,7 +99,6 @@ feature{ANY}
 							index_start := ligne_tab.item(i).index_of('<', 1)					
 							index_end := ligne_tab.item(i).index_of('>', 1)
 							user.set_nom(ligne_tab.item(i).substring(index_start+1, index_end-1))
-							io.put_string("nom: "+user.get_nom+"%N")
 						end
 
 						-- si la case correspond au prénom, attribuer le 
@@ -127,13 +135,13 @@ feature{ANY}
 
 
 					-- Ajout de l'utilisateur dans le tableau
-					lst_user.add_last(user)
+					lst_users.add_last(user)
 				end
 							
 			end
 		end
-		
-	remplir_lst_media is
+	--récupère tous les médias du fichier	
+	remplir_lst_medias is
 		local
 			ligne: STRING -- ligne du fichier utilisateur
 			fichier: TEXT_FILE_READ -- Fichier media ouvert en lecture
@@ -199,14 +207,12 @@ feature{ANY}
 						if ligne_tab.item(i).has_substring("Livre") then
 							is_livre := True
 							create livre.make
-							livre.set_type("LIVRE")
 						end
 						
 						-- si la case correspond au type dvd, créer un dvd
 						if ligne_tab.item(i).has_substring("DVD") then
 							is_livre := False
 							create dvd.make
-							dvd.set_type("DVD")
 						end
 						
 
@@ -239,7 +245,10 @@ feature{ANY}
 							index_start := ligne_tab.item(i).index_of('<', 1)
 							index_end := ligne_tab.item(i).index_of('>', 1)
 							create auteur.make
-							auteur.set_nom(ligne_tab.item(i).substring(index_start+1, index_end-1))
+							auteur.set_prenom(ligne_tab.item(i).substring(index_start+1, index_end-1))
+						 --	index_start := ligne_tab.item(i).index_of(' ', 1)
+						 --	index_end := ligne_tab.item(i).index_of('>', 1)
+						 --	auteur.set_nom(ligne_tab.item(i).substring(index_start+1, index_end-1))
 							livre.set_auteur(auteur)
 							
 						end
@@ -249,7 +258,10 @@ feature{ANY}
 							index_start := ligne_tab.item(i).index_of('<', 1)
 							index_end := ligne_tab.item(i).index_of('>', 1)
 							create acteur.make
-							acteur.set_nom(ligne_tab.item(i).substring(index_start+1, index_end-1))
+							acteur.set_prenom(ligne_tab.item(i).substring(index_start+1, index_end-1))
+						-- 	index_start := ligne_tab.item(i).index_of('<', 1)
+						-- 	index_end := ligne_tab.item(i).index_of(' ', 1)
+						-- 	acteur.set_prenom(ligne_tab.item(i).substring(index_start+1, index_end-1))
 							dvd.ajouter_acteur(acteur)
 						end
 						
@@ -258,7 +270,10 @@ feature{ANY}
 							index_start := ligne_tab.item(i).index_of('<', 1)
 							index_end := ligne_tab.item(i).index_of('>', 1)
 							create realisateur.make
-							realisateur.set_nom(ligne_tab.item(i).substring(index_start+1, index_end-1))
+							realisateur.set_prenom(ligne_tab.item(i).substring(index_start+1, index_end-1))
+						--	index_start := ligne_tab.item(i).index_of(' ', 1)
+						--	index_end := ligne_tab.item(i).index_of('>', 1)
+						--	realisateur.set_nom(ligne_tab.item(i).substring(index_start+1, index_end-1))						
 							dvd.ajouter_realisateur(realisateur)
 						end
 						i := i + 1
@@ -268,15 +283,154 @@ feature{ANY}
 
 					-- Ajout du média dans le tableau
 					if is_livre then
-						lst_media.add_last(livre)
+						lst_medias.add_last(livre)
+						lst_livres.add_last(livre)
 					else 
-						lst_media.add_last(dvd)
+						lst_medias.add_last(dvd)
+						lst_dvd.add_last(dvd)
 					end					
 				end
 							
 			end
 		end
 
+	
+		
+	remplir_lst_auteurs_realisateurs_acteurs is
+		local
+			i: INTEGER
+			un_dvd : DVD
+			un_livre : LIVRE
+		do
+			from i:= 0
+			until i = lst_livres.count
+			loop
+				un_livre := lst_livres.item(i)
+				remplir_lst_auteurs(un_livre)
+				i := i+1
+			end
+			from i:= 0
+			until i = lst_dvd.count
+			loop
+				un_dvd := lst_dvd.item(i)
+				remplir_lst_acteurs(un_dvd)
+				remplir_lst_realisateurs(un_dvd)
+				i := i+1
+			end
+		end
+		
+	remplir_lst_auteurs (un_livre: LIVRE) is
+		local
+			un_auteur : AUTEUR
+			indice_trouver : INTEGER
+		do
+			un_auteur := un_livre.get_auteur
+			if un_auteur /= Void then
+				indice_trouver := verifier_lst_auteurs(un_auteur)
+				if indice_trouver >=0 then
+					lst_auteurs.item(indice_trouver).ajouter_livre(un_livre)
+				else
+					un_auteur.ajouter_livre(un_livre)
+					lst_auteurs.add_last(un_auteur)
+				end				
+			end
+		end
+	remplir_lst_acteurs(un_dvd : DVD) is
+		local
+			i : INTEGER
+			acteurs : ARRAY[ACTEUR]
+			indice_trouver : INTEGER
+		do
+			acteurs := un_dvd.get_lst_acteurs
+			from i:= 0
+			until i = acteurs.count
+			loop
+				indice_trouver := verifier_lst_acteurs(acteurs.item(i))
+				if indice_trouver >= 0 then
+					lst_acteurs.item(indice_trouver).ajouter_film(un_dvd)
+				else
+					acteurs.item(i).ajouter_film(un_dvd)
+					lst_acteurs.add_last(acteurs.item(i))
+				end
+				i:= i+1
+			end
+		end
+			
+	remplir_lst_realisateurs(un_dvd : DVD) is
+		local
+			i : INTEGER
+			realisateurs : ARRAY[REALISATEUR]
+			indice_trouver : INTEGER
+		do
+			realisateurs := un_dvd.get_lst_realisateurs
+			from i:= 0
+			until i = realisateurs.count
+			loop
+				indice_trouver := verifier_lst_realisateurs(realisateurs.item(i))
+				if indice_trouver >= 0 then
+					lst_realisateurs.item(indice_trouver).ajouter_film(un_dvd)
+				else
+					realisateurs.item(i).ajouter_film(un_dvd)
+					lst_realisateurs.add_last(realisateurs.item(i))
+				end
+				i:= i+1
+			end
+		end
+				
+	verifier_lst_auteurs(un_auteur : AUTEUR):INTEGER  is
+		local
+			i : INTEGER
+			rst : INTEGER
+		do
+			rst := -1
+			from i := 0
+			until i = lst_auteurs.count
+			loop
+				
+				if un_auteur.get_prenom.is_equal(lst_auteurs.item(i).get_prenom) then
+					rst := i
+				end
+				i := i + 1
+			end
+			Result := rst
+		end	
+		
+	verifier_lst_acteurs(un_acteur : ACTEUR):INTEGER  is
+		local
+			i : INTEGER
+			rst : INTEGER
+		do
+			rst := -1
+			from i := 0
+			until i = lst_acteurs.count
+			loop
+				
+				if un_acteur.get_prenom.is_equal(lst_acteurs.item(i).get_prenom) then
+					rst := i
+				end
+				i := i + 1
+			end
+			Result := rst
+		end	
+		
+	verifier_lst_realisateurs(un_realisateur : REALISATEUR):INTEGER  is
+		local
+			i : INTEGER
+			rst : INTEGER
+		do
+			rst := -1
+			from i := 0
+			until i = lst_realisateurs.count
+			loop
+				
+				if un_realisateur.get_prenom.is_equal(lst_realisateurs.item(i).get_prenom) then
+					rst := i
+				end
+				i := i + 1
+			end
+			Result := rst
+		end	
+						
 	afficher_tableau_user is
 		local
 			i :INTEGER
@@ -284,9 +438,9 @@ feature{ANY}
 			io.put_string("affichage des utilisateurs")
 			io.put_string("%N")
 			from i:= 0
-			until i = lst_user.count
+			until i = lst_users.count
 			loop
-				io.put_string(lst_user.item(i).to_string)
+				io.put_string(lst_users.item(i).to_string)
 				io.put_string("%N")
 				i := i+1
 			end
@@ -299,9 +453,16 @@ feature{ANY}
 			io.put_string("affichage des médias")
 			io.put_string("%N")
 			from i:= 0
-			until i = lst_media.count
-			loop
-				io.put_string(lst_media.item(i).to_string)
+			until i = lst_livres.count
+			loop					
+				io.put_string(lst_livres.item(i).to_string)
+				io.put_string("%N")
+				i := i+1
+			end
+			from i:= 0
+			until i = lst_dvd.count
+			loop					
+				io.put_string(lst_dvd.item(i).to_string)
 				io.put_string("%N")
 				i := i+1
 			end
@@ -322,39 +483,35 @@ feature{ANY}
 			end
 		end
 		
-	remplir_lst_realisateur_acteurs_auteurs is
+	afficher_tableau_realisateurs is
 		local
-			i,j: INTEGER
-			media: MEDIA
-			livre : LIVRE
-			dvd : DVD
-			trouver: BOOLEAN
+			i :INTEGER
 		do
+			io.put_string("affichage des réalisateurs")
+			io.put_string("%N")
 			from i:= 0
-			until i = lst_media.count
+			until i = lst_realisateurs.count
 			loop
-				media := lst_media.item(i)
-				if media.get_type.is_equal("LIVRE") then
-					create livre.make
-					livre.make_from_media(media)
-					trouver:= False
-					from j:= 0
-					until j = lst_auteurs.count
-					loop
-						if lst_auteurs.item(j).get_nom = livre.get_auteur.get_nom then
-							trouver := True
-						end
-						j := j+1
-					end
-					if not trouver then
-						lst_auteurs.add_last(livre.get_auteur)
-					end
-				end
+				io.put_string(lst_realisateurs.item(i).to_string)
+				io.put_string("%N")
 				i := i+1
 			end
 		end
-					
-
+		
+	afficher_tableau_acteurs is
+		local
+			i :INTEGER
+		do
+			io.put_string("affichage des acteurs")
+			io.put_string("%N")
+			from i:= 0
+			until i = lst_acteurs.count
+			loop
+				io.put_string(lst_acteurs.item(i).to_string)
+				io.put_string("%N")
+				i := i+1
+			end
+		end
 
 end
 

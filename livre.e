@@ -1,6 +1,7 @@
 class LIVRE inherit
 	MEDIA
 	rename make as make_media
+	redefine to_string
 	end
 
 creation{ANY}
@@ -14,13 +15,7 @@ feature {ANY}
 			make_media
 			create auteur.make
 		end
-	
-	make_from_media (m: MEDIA) is
-		do
-			titre := m.get_titre
-			nombre_exemplaires := m.get_nombre_exemplaires
-		end
-		
+			
 	set_auteur (a: AUTEUR) is
 		do
 			auteur:= a
@@ -29,5 +24,10 @@ feature {ANY}
 	get_auteur : AUTEUR is
 		do
 			Result:= auteur
+		end
+		
+	to_string : STRING is
+		do
+			Result := "LIVRE:{titre:"+titre+", nombre_exemplaires:"+nombre_exemplaires.to_string+", Auteur:"+auteur.to_string+"}"
 		end
 end
