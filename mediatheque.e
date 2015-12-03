@@ -11,11 +11,24 @@ feature{}
   	lst_auteurs: ARRAY[AUTEUR] -- liste des auteurs
   	lst_livres: ARRAY[LIVRE]
   	lst_dvd : ARRAY[DVD]
+  	utilisateur_connecte : UTILISATEUR
 
 feature{ANY}
 	make is
 		do
-			create lst_users.with_capacity(1, 0)
+			initialisation
+			--connexion
+			--Demander login et mot de passe, rechercher l'utilisateur dans la liste
+			-- l'utilisateur a droit à trois tentative de connexion
+			-- a la quatrième il est révoqué et un administrateur doit lui modifier son statut
+			--afficher_menu
+			--affichage d'un menu différent en fonction du rang de l'utilisateur
+			--déclenche les fonctions "rechercher_media" et "ajouter_utilisateur"
+		end
+		
+	initialisation is
+		do
+		create lst_users.with_capacity(1, 0)
 			create lst_medias.with_capacity(1,0)
 			create lst_auteurs.with_capacity(1,0)
 			create lst_acteurs.with_capacity(1,0)
@@ -243,12 +256,12 @@ feature{ANY}
 						--si la case indique un auteur, on assigne l'auteur au livre
 						if ligne_tab.item(i).has_substring("Auteur") then 
 							index_start := ligne_tab.item(i).index_of('<', 1)
-							index_end := ligne_tab.item(i).index_of('>', 1)
+							index_end := ligne_tab.item(i).index_of(' ', index_start)
 							create auteur.make
 							auteur.set_prenom(ligne_tab.item(i).substring(index_start+1, index_end-1))
-						 --	index_start := ligne_tab.item(i).index_of(' ', 1)
-						 --	index_end := ligne_tab.item(i).index_of('>', 1)
-						 --	auteur.set_nom(ligne_tab.item(i).substring(index_start+1, index_end-1))
+						 	index_start := ligne_tab.item(i).index_of(' ', index_start)
+						 	index_end := ligne_tab.item(i).index_of('>', 1)
+						 	auteur.set_nom(ligne_tab.item(i).substring(index_start+1, index_end-1))
 							livre.set_auteur(auteur)
 							
 						end
@@ -256,24 +269,24 @@ feature{ANY}
 						--si la case indique un acteur, on ajoute l'acteur à la liste
 						if ligne_tab.item(i).has_substring("Acteur") then 
 							index_start := ligne_tab.item(i).index_of('<', 1)
-							index_end := ligne_tab.item(i).index_of('>', 1)
+							index_end := ligne_tab.item(i).index_of(' ', index_start)
 							create acteur.make
 							acteur.set_prenom(ligne_tab.item(i).substring(index_start+1, index_end-1))
-						-- 	index_start := ligne_tab.item(i).index_of('<', 1)
-						-- 	index_end := ligne_tab.item(i).index_of(' ', 1)
-						-- 	acteur.set_prenom(ligne_tab.item(i).substring(index_start+1, index_end-1))
+						 	index_start := ligne_tab.item(i).index_of(' ', index_start)
+						 	index_end := ligne_tab.item(i).index_of('>', 1)
+						 	acteur.set_nom(ligne_tab.item(i).substring(index_start+1, index_end-1))
 							dvd.ajouter_acteur(acteur)
 						end
 						
 						--si la case indique un réalisateur, on ajoute le réalisateur à la liste
 						if ligne_tab.item(i).has_substring("Realisateur") then 
 							index_start := ligne_tab.item(i).index_of('<', 1)
-							index_end := ligne_tab.item(i).index_of('>', 1)
+							index_end := ligne_tab.item(i).index_of(' ', index_start)
 							create realisateur.make
 							realisateur.set_prenom(ligne_tab.item(i).substring(index_start+1, index_end-1))
-						--	index_start := ligne_tab.item(i).index_of(' ', 1)
-						--	index_end := ligne_tab.item(i).index_of('>', 1)
-						--	realisateur.set_nom(ligne_tab.item(i).substring(index_start+1, index_end-1))						
+							index_start := ligne_tab.item(i).index_of(' ', index_start)
+							index_end := ligne_tab.item(i).index_of('>', 1)
+							realisateur.set_nom(ligne_tab.item(i).substring(index_start+1, index_end-1))						
 							dvd.ajouter_realisateur(realisateur)
 						end
 						i := i + 1
@@ -387,7 +400,8 @@ feature{ANY}
 			until i = lst_auteurs.count
 			loop
 				
-				if un_auteur.get_prenom.is_equal(lst_auteurs.item(i).get_prenom) then
+				if un_auteur.get_prenom.is_equal(lst_auteurs.item(i).get_prenom) 
+				and un_auteur.get_nom.is_equal(lst_auteurs.item(i).get_nom) then
 					rst := i
 				end
 				i := i + 1
@@ -405,7 +419,8 @@ feature{ANY}
 			until i = lst_acteurs.count
 			loop
 				
-				if un_acteur.get_prenom.is_equal(lst_acteurs.item(i).get_prenom) then
+				if un_acteur.get_prenom.is_equal(lst_acteurs.item(i).get_prenom) 
+				and	un_acteur.get_nom.is_equal(lst_acteurs.item(i).get_nom) then
 					rst := i
 				end
 				i := i + 1
@@ -423,7 +438,8 @@ feature{ANY}
 			until i = lst_realisateurs.count
 			loop
 				
-				if un_realisateur.get_prenom.is_equal(lst_realisateurs.item(i).get_prenom) then
+				if un_realisateur.get_prenom.is_equal(lst_realisateurs.item(i).get_prenom)
+				and	un_realisateur.get_nom.is_equal(lst_realisateurs.item(i).get_nom) then
 					rst := i
 				end
 				i := i + 1
@@ -513,8 +529,8 @@ feature{ANY}
 			end
 		end
 
-end
 
+end
 
 
 
