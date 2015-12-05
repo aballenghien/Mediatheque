@@ -52,6 +52,11 @@ feature{ANY}
 		do
 			Result := identifiant
 		end
+		
+	is_admin : BOOLEAN is
+		do
+			Result := admin
+		end
 
 	to_string : STRING is
 		do

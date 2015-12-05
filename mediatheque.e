@@ -12,18 +12,14 @@ feature{}
   	lst_livres: ARRAY[LIVRE]
   	lst_dvd : ARRAY[DVD]
   	utilisateur_connecte : UTILISATEUR
+  	lst_media_choisis : ARRAY[MEDIA]
 
 feature{ANY}
 	make is
 		do
 			initialisation
-			--connexion
-			--Demander login et mot de passe, rechercher l'utilisateur dans la liste
-			-- l'utilisateur a droit à trois tentative de connexion
-			-- a la quatrième il est révoqué et un administrateur doit lui modifier son statut
-			--afficher_menu
-			--affichage d'un menu différent en fonction du rang de l'utilisateur
-			--déclenche les fonctions "rechercher_media" et "ajouter_utilisateur"
+			connexion
+		
 		end
 		
 	initialisation is
@@ -35,6 +31,7 @@ feature{ANY}
 			create lst_realisateurs.with_capacity(1,0)
 			create lst_livres.with_capacity(1,0)
 			create lst_dvd.with_capacity(1,0)
+			create lst_media_choisis.with_capacity(1,0)
 			remplir_lst_users
 		--	afficher_tableau_user
 			remplir_lst_medias
@@ -528,7 +525,153 @@ feature{ANY}
 				i := i+1
 			end
 		end
-
+		
+	afficher_menu (un_utilisateur: UTILISATEUR) is
+		local
+			choix : STRING
+		do
+			io.put_string("Que souhaitez vous faire ?")
+			io.put_string("%N")
+			io.put_string("1. Consulter la liste des médias")
+			io.put_string("%N")
+			io.put_string("2. Gérer mes réservations")
+			io.put_string("%N")
+			io.put_string("3. Gérer les informations de mon compte")
+			io.put_string("%N")
+			
+			if un_utilisateur.is_admin then
+				io.put_string("4. Consulter la liste des utilisateurs")
+				io.put_string("%N")
+				io.put_string("5. Modifier les informations d'un utilisateur")
+				io.put_string("%N")
+				io.put_string("6. Ajouter un utilisateur")
+				io.put_string("%N")
+			end
+			
+			io.flush
+			io.read_line
+			choix := io.last_string
+			if choix.to_integer = 1 then
+			--	rechercher_media
+			
+			else
+				if choix.to_integer = 2 then
+					io.put_string("encore en cours de développement")
+					io.put_string("%N")
+				else
+					if choix.to_integer = 3 then
+						io.put_string("encore en cours de développement")
+						io.put_string("%N")
+					else
+						if un_utilisateur.is_admin then
+							if choix.to_integer = 4 then
+								io.put_string("encore en cours de développement")
+								io.put_string("%N")
+							else
+								if choix.to_integer = 5 then
+									io.put_string("encore en cours de développement")
+									io.put_string("%N")
+								else
+									if choix.to_integer = 6 then
+										io.put_string("encore en cours de développement")
+										io.put_string("%N")
+									end
+								end
+							end
+						else
+							io.put_string("Vous n'êtes pas autorisé a exécuter cette action")
+							io.put_string("%N")
+						end
+					end
+				end
+			end
+		end
+			
+		connexion is
+			local 
+				identifiant : STRING
+				mot_de_passe : STRING
+				compteur : INTEGER
+				connexion_ok : BOOLEAN
+			do
+				connexion_ok := False
+				io.put_string("CONNEXION")
+				io.put_string("%N")
+				from compteur := 1
+				until compteur = 3 or connexion_ok
+				loop
+					io.put_string("%N")
+					io.put_string("Veuillez entrer votre identifiant:")
+					io.flush
+					io.read_line
+					identifiant := io.last_string
+					utilisateur_connecte := rechercher_utilisateur(identifiant)
+					if utilisateur_connecte /=Void then
+						io.put_string("Mot de passe pour "+identifiant +":")
+						io.flush
+						io.read_line
+						mot_de_passe := io.last_string
+						if mot_de_passe.is_equal("test") then
+							connexion_ok := True
+						else
+							io.put_string("Mot de passe invalide")
+							io.put_string("%N")
+						end
+					else
+						io.put_string("Identifiant non reconnu")
+						io.put_string("%N")
+					end
+					compteur := compteur + 1
+				end
+				
+				if connexion_ok then
+					io.put_string("Bienvenue "+utilisateur_connecte.get_prenom)
+					io.put_string("%N")
+					afficher_menu(utilisateur_connecte)
+				else
+					io.put_string("Votre compte a été bloqué, veuillez contacter un administrateur de la médiathèque pour pouvoir vous reconnecter")
+					io.put_string("%N")
+				end
+			end
+				
+		rechercher_utilisateur(identifiant : STRING) : UTILISATEUR is
+			local
+				i : INTEGER
+			do
+				Result := Void
+				from i := 0
+				until i = lst_users.count
+				loop
+					if lst_users.item(i).get_identifiant.is_equal(identifiant) then
+						Result := lst_users.item(i)
+					end
+					i := i + 1
+				end
+			end
+			
+		rechercher_media is
+			local
+				choix : STRING
+			do
+				io.put_string("Choisissez un critère de recherche : ")
+				io.put_string("%N")			
+				io.put_string("1. Je sais quel type de média je cherche")
+				io.put_string("%N")	
+				io.put_string("2. Je connais le titre ")
+				io.put_string("%N")	
+				io.put_string("3. Je connais un acteur")
+				io.put_string("%N")	
+				io.put_string("4. Je connais un auteur")
+				io.put_string("%N")	
+				io.put_string("5. Je connais un réalisateur")
+				io.put_string("%N")	
+				io.put_string("6. Je commais l'année de la parution du DVD")
+				io.put_string("%N")	
+				io.flush
+				io.read_line
+				choix := io.last_string
+									
+						
 
 end
 
