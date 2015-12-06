@@ -52,5 +52,10 @@ feature {ANY}
 			rst.append("}")
 			Result := rst
 		end
+		
+	get_lst_films : ARRAY[DVD] is
+		do
+			Result := lst_films
+		end
 
 end

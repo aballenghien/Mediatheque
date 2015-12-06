@@ -16,9 +16,45 @@ feature{}
 
 feature{ANY}
 	make is
+		local
+			continuer : BOOLEAN
+			choix : STRING
+			correct : BOOLEAN
 		do
+			continuer := True
 			initialisation
 			connexion
+			from
+			until not continuer
+			loop
+				if utilisateur_connecte /= Void then
+					afficher_menu(utilisateur_connecte)
+					correct := False
+					choix := ""
+					from
+					until correct
+					loop
+						io.put_string("retour au menu ? O/N")
+						io.put_string("%N")
+						io.flush
+						io.read_line
+						choix.copy(io.last_string)
+						choix.to_upper
+						if choix.is_equal("O") or choix.is_equal("N") then
+							correct := True
+							if choix.is_equal("O") then
+								continuer := True
+							else 
+								continuer := False
+							end
+						else
+							io.put_string("O/N")
+							io.put_string("%N")
+						end
+					end
+				end
+			end
+					
 		
 		end
 		
@@ -33,13 +69,14 @@ feature{ANY}
 			create lst_dvd.with_capacity(1,0)
 			create lst_media_choisis.with_capacity(1,0)
 			remplir_lst_users
-		--	afficher_tableau_user
+		--	afficher_tableau(l"USER")
 			remplir_lst_medias
-		--	afficher_tableau_media
+		--	afficher_tableau("LIVRE")
+		--  afficher_tableau("dvd")
 			remplir_lst_auteurs_realisateurs_acteurs
-			afficher_tableau_auteurs
-			afficher_tableau_acteurs
-			afficher_tableau_realisateurs
+		--	afficher_tableau("AUTEUR")
+		--	afficher_tableau("ACTEUR")
+		--	afficher_tableau("REALISATEUR")
 		end
 
 --récupère tous les utilisateurs dans le fichier
@@ -286,6 +323,12 @@ feature{ANY}
 							realisateur.set_nom(ligne_tab.item(i).substring(index_start+1, index_end-1))						
 							dvd.ajouter_realisateur(realisateur)
 						end
+						
+						if ligne_tab.item(i).has_substring("Annee") then 
+							index_start := ligne_tab.item(i).index_of('<', 1)
+							index_end := ligne_tab.item(i).index_of('>', index_start)
+							dvd.set_annee(ligne_tab.item(i).substring(index_start+1, index_end-1).to_integer)
+						end
 						i := i + 1
 					end
 					
@@ -444,92 +487,105 @@ feature{ANY}
 			Result := rst
 		end	
 						
-	afficher_tableau_user is
+	afficher_tableau (lst : STRING) is
 		local
 			i :INTEGER
 		do
-			io.put_string("affichage des utilisateurs")
-			io.put_string("%N")
-			from i:= 0
-			until i = lst_users.count
-			loop
-				io.put_string(lst_users.item(i).to_string)
+			if lst.is_equal("USER") then
+				io.put_string("affichage des utilisateurs")
 				io.put_string("%N")
-				i := i+1
+				from i:= 0
+				until i = lst_users.count
+				loop
+					io.put_string(lst_users.item(i).to_string)
+					io.put_string("%N")
+					i := i+1
+				end
+			end
+			if lst.is_equal("LIVRE") then
+				io.put_string("affichage des livres")
+				io.put_string("%N")
+				from i:= 0
+				until i = lst_livres.count
+				loop
+					io.put_string(lst_livres.item(i).to_string)
+					io.put_string("%N")
+					i := i+1
+				end
+			end
+			if lst.is_equal("DVD") then
+				io.put_string("affichage des DVD")
+				io.put_string("%N")
+				from i:= 0
+				until i = lst_dvd.count
+				loop
+					io.put_string(lst_dvd.item(i).to_string)
+					io.put_string("%N")
+					i := i+1
+				end
+			end
+			if lst.is_equal("MEDIA") then
+				io.put_string("medias")
+				io.put_string("%N")
+				from i:= 0
+				until i = lst_medias.count
+				loop
+					io.put_string(lst_medias.item(i).to_string)
+					io.put_string("%N")
+					i := i+1
+				end
+			end
+			if lst.is_equal("ACTEUR") then
+				io.put_string("affichage des acteurs")
+				io.put_string("%N")
+				from i:= 0
+				until i = lst_acteurs.count
+				loop
+					io.put_string(lst_acteurs.item(i).to_string)
+					io.put_string("%N")
+					i := i+1
+				end
+			end
+			if lst.is_equal("AUTEUR") then
+				io.put_string("affichage des auteurs")
+				io.put_string("%N")
+				from i:= 0
+				until i = lst_auteurs.count
+				loop
+					io.put_string(lst_auteurs.item(i).to_string)
+					io.put_string("%N")
+					i := i+1
+				end
+			end
+			if lst.is_equal("REALISATEUR") then
+				io.put_string("affichage des realisateurs")
+				io.put_string("%N")
+				from i:= 0
+				until i = lst_realisateurs.count
+				loop
+					io.put_string(lst_realisateurs.item(i).to_string)
+					io.put_string("%N")
+					i := i+1
+				end
+			end
+			if lst.is_equal("MEDIACHOISIS") then
+				from i:= 0
+				until i = lst_media_choisis.count
+				loop
+					io.put_string(lst_media_choisis.item(i).to_string)
+					io.put_string("%N")
+					i := i+1
+				end
 			end
 		end
 		
-	afficher_tableau_media is
-		local
-			i :INTEGER
-		do
-			io.put_string("affichage des médias")
-			io.put_string("%N")
-			from i:= 0
-			until i = lst_livres.count
-			loop					
-				io.put_string(lst_livres.item(i).to_string)
-				io.put_string("%N")
-				i := i+1
-			end
-			from i:= 0
-			until i = lst_dvd.count
-			loop					
-				io.put_string(lst_dvd.item(i).to_string)
-				io.put_string("%N")
-				i := i+1
-			end
-		end
-		
-	afficher_tableau_auteurs is
-		local
-			i :INTEGER
-		do
-			io.put_string("affichage des auteurs")
-			io.put_string("%N")
-			from i:= 0
-			until i = lst_auteurs.count
-			loop
-				io.put_string(lst_auteurs.item(i).to_string)
-				io.put_string("%N")
-				i := i+1
-			end
-		end
-		
-	afficher_tableau_realisateurs is
-		local
-			i :INTEGER
-		do
-			io.put_string("affichage des réalisateurs")
-			io.put_string("%N")
-			from i:= 0
-			until i = lst_realisateurs.count
-			loop
-				io.put_string(lst_realisateurs.item(i).to_string)
-				io.put_string("%N")
-				i := i+1
-			end
-		end
-		
-	afficher_tableau_acteurs is
-		local
-			i :INTEGER
-		do
-			io.put_string("affichage des acteurs")
-			io.put_string("%N")
-			from i:= 0
-			until i = lst_acteurs.count
-			loop
-				io.put_string(lst_acteurs.item(i).to_string)
-				io.put_string("%N")
-				i := i+1
-			end
-		end
+	
 		
 	afficher_menu (un_utilisateur: UTILISATEUR) is
 		local
 			choix : STRING
 		do
+			choix := ""
 			io.put_string("Que souhaitez vous faire ?")
 			io.put_string("%N")
 			io.put_string("1. Consulter la liste des médias")
@@ -550,40 +606,45 @@ feature{ANY}
 			
 			io.flush
 			io.read_line
-			choix := io.last_string
-			if choix.to_integer = 1 then
-			--	rechercher_media
-			
-			else
-				if choix.to_integer = 2 then
-					io.put_string("encore en cours de développement")
-					io.put_string("%N")
+			choix.copy(io.last_string)
+			if choix.is_integer then
+				if choix.to_integer = 1 then
+					rechercher_media
+				
 				else
-					if choix.to_integer = 3 then
+					if choix.to_integer = 2 then
 						io.put_string("encore en cours de développement")
 						io.put_string("%N")
 					else
-						if un_utilisateur.is_admin then
-							if choix.to_integer = 4 then
-								io.put_string("encore en cours de développement")
-								io.put_string("%N")
-							else
-								if choix.to_integer = 5 then
+						if choix.to_integer = 3 then
+							io.put_string("encore en cours de développement")
+							io.put_string("%N")
+						else
+							if un_utilisateur.is_admin then
+								if choix.to_integer = 4 then
 									io.put_string("encore en cours de développement")
 									io.put_string("%N")
 								else
-									if choix.to_integer = 6 then
+									if choix.to_integer = 5 then
 										io.put_string("encore en cours de développement")
 										io.put_string("%N")
+									else
+										if choix.to_integer = 6 then
+											io.put_string("encore en cours de développement")
+											io.put_string("%N")
+										end
 									end
 								end
+							else
+								io.put_string("Vous n'êtes pas autorisé a exécuter cette action")
+								io.put_string("%N")
 							end
-						else
-							io.put_string("Vous n'êtes pas autorisé a exécuter cette action")
-							io.put_string("%N")
 						end
 					end
 				end
+			else
+				io.put_string("Veuillez choisir un chiffre")
+				io.put_string("%N")
 			end
 		end
 			
@@ -595,6 +656,8 @@ feature{ANY}
 				connexion_ok : BOOLEAN
 			do
 				connexion_ok := False
+				identifiant := ""
+				mot_de_passe := ""
 				io.put_string("CONNEXION")
 				io.put_string("%N")
 				from compteur := 1
@@ -604,13 +667,13 @@ feature{ANY}
 					io.put_string("Veuillez entrer votre identifiant:")
 					io.flush
 					io.read_line
-					identifiant := io.last_string
+					identifiant.copy(io.last_string)
 					utilisateur_connecte := rechercher_utilisateur(identifiant)
 					if utilisateur_connecte /=Void then
 						io.put_string("Mot de passe pour "+identifiant +":")
 						io.flush
 						io.read_line
-						mot_de_passe := io.last_string
+						mot_de_passe.copy(io.last_string)
 						if mot_de_passe.is_equal("test") then
 							connexion_ok := True
 						else
@@ -652,26 +715,279 @@ feature{ANY}
 		rechercher_media is
 			local
 				choix : STRING
+				reponse: STRING
+				correct : BOOLEAN
+				scorrect : BOOLEAN
+				resultat : INTEGER
+				type : STRING
 			do
-				io.put_string("Choisissez un critère de recherche : ")
-				io.put_string("%N")			
-				io.put_string("1. Je sais quel type de média je cherche")
-				io.put_string("%N")	
-				io.put_string("2. Je connais le titre ")
-				io.put_string("%N")	
-				io.put_string("3. Je connais un acteur")
-				io.put_string("%N")	
-				io.put_string("4. Je connais un auteur")
-				io.put_string("%N")	
-				io.put_string("5. Je connais un réalisateur")
-				io.put_string("%N")	
-				io.put_string("6. Je commais l'année de la parution du DVD")
-				io.put_string("%N")	
-				io.flush
-				io.read_line
-				choix := io.last_string
-									
-						
+				correct := False
+				choix := ""
+				reponse := ""
+				from
+				until correct
+				loop
+					io.put_string("Choisissez un critère de recherche : ")
+					io.put_string("%N")			
+					io.put_string("1. Je sais quel type de média je cherche")
+					io.put_string("%N")	
+					io.put_string("2. Je connais le titre ")
+					io.put_string("%N")	
+					io.put_string("3. Je connais un acteur")
+					io.put_string("%N")	
+					io.put_string("4. Je connais un auteur")
+					io.put_string("%N")	
+					io.put_string("5. Je connais un réalisateur")
+					io.put_string("%N")	
+					io.put_string("6. Je commais l'année de la parution du DVD")
+					io.put_string("%N")	
+					io.flush
+					io.read_line
+					choix.copy(io.last_string)
+					resultat := 0
+					if choix.is_integer then
+						if choix.to_integer = 1 then
+							scorrect := False
+							correct := True
+							from 
+							until scorrect
+							loop
+								io.put_string("Vous recherchez : 1: Un DVD, 2: Un Livre")
+								io.put_string("%N")
+								io.flush
+								io.read_line
+							reponse.copy(io.last_string)
+								if reponse.to_integer = 1 then
+									scorrect := True
+									type := "DVD"
+								end
+								if reponse.to_integer = 2 then
+									scorrect := True
+									type := "LIVRE"
+								end
+							end
+							resultat := rechercher_media_par_type(type)
+						end
+						if choix.to_integer = 2 then
+							correct := True
+							io.put_string("Donnez le titre ou une partie du titre:")
+							io.put_string("%N")
+							io.flush
+							io.read_line
+							reponse.copy(io.last_string)
+							resultat := rechercher_media_par_titre(reponse)
+						end 
+						if choix.to_integer = 3 then
+							correct:= True
+							io.put_string("Donnez le nom et/ou le prenom de l'acteur (au format nom/prenom)")
+							io.put_string("%N")
+							io.flush
+							io.read_line
+							reponse.copy(io.last_string)
+							scorrect := False
+							from
+							until scorrect
+							loop
+								if reponse.has_substring("/") then
+									scorrect := True
+								else
+									io.put_string("Le format est nom/prenom")
+									io.put_string("%N")
+									io.flush
+									io.read_line
+									reponse.copy(io.last_string)
+								end
+							end	
+							resultat := rechercher_media_par_personne("ACTEUR",reponse)
+						end
+						if choix.to_integer = 4 then
+							correct:= True
+							io.put_string("Donnez le nom et/ou le prenom de l'auteur (au format nom/prenom)")
+							io.put_string("%N")
+							io.flush
+							io.read_line
+							reponse.copy(io.last_string)
+							scorrect := False
+							from
+							until scorrect
+							loop
+								if reponse.has_substring("/") then
+									scorrect := True
+								else
+									io.put_string("Le format est nom/prenom")
+									io.put_string("%N")
+									io.flush
+									io.read_line
+									reponse.copy(io.last_string)
+								end
+							end	
+							resultat := rechercher_media_par_personne("AUTEUR",reponse)
+						end
+						if choix.to_integer = 5 then
+							correct:= True
+							io.put_string("Donnez le nom et/ou le prenom du réalisateur (au format nom/prenom)")
+							io.put_string("%N")
+							io.flush
+							io.read_line
+							reponse.copy(io.last_string)
+							scorrect := False
+							from
+							until scorrect
+							loop
+								if reponse.has_substring("/") then
+									scorrect := True
+								else
+									io.put_string("Le format est nom/prenom")
+									io.put_string("%N")
+									io.flush
+									io.read_line
+									reponse.copy(io.last_string)
+								end
+							end	
+							resultat := rechercher_media_par_personne("REALISATEUR",reponse)
+						end
+						if choix.to_integer = 6 then
+							scorrect := False
+							correct :=True
+							from
+							until scorrect
+							loop
+								io.put_string("En quel année est sortie le DVD ?")
+								io.put_string("%N")
+								io.flush
+								io.read_line
+								reponse.copy(io.last_string)
+								if reponse.is_integer and reponse.to_integer > 1000 and reponse.to_integer < 9999 then
+									scorrect := True
+								else
+									io.put_string("Donnez une année sur quatres chiffres")
+									io.put_string("%N")
+								end
+							end
+							resultat := rechercher_media_par_annee(reponse.to_integer)
+							
+						end
+						if choix.to_integer <= 0 or choix.to_integer > 6 then
+							correct := False
+							io.put_string("aucune action ne correspond à ce choix")
+							io.put_string("%N")
+						end
+					else
+						io.put_string("Veulliez choisir")
+						io.put_string("%N")
+					end
+				end
+				io.put_string("Nous avons trouvé "+resultat.to_string+" médias correspondants à votre recherche:")
+				io.put_string("%N")
+				afficher_tableau("MEDIACHOISIS")
+			end
+			
+		rechercher_media_par_type (type:STRING):INTEGER is
+			do
+				create lst_media_choisis.with_capacity(1,0)
+				if type.is_equal("LIVRE") then
+					lst_media_choisis := lst_livres
+				else
+					lst_media_choisis := lst_dvd
+				end
+				Result := lst_media_choisis.count
+			end
+			
+		rechercher_media_par_titre (titre: STRING) : INTEGER is
+			local
+				i: INTEGER
+			do
+				create lst_media_choisis.with_capacity(1,0)
+				from i:=0
+				until i = lst_medias.count
+				loop
+					if lst_medias.item(i).get_titre.has_substring(titre) then
+						lst_media_choisis.add_last(lst_medias.item(i))
+					end
+					i := i+1
+				end
+				Result := lst_media_choisis.count
+			end
+			
+		rechercher_media_par_personne (type_personne: STRING; nom_prenom : STRING) : INTEGER is
+			local
+				i,j : INTEGER
+				nom : STRING
+				prenom : STRING
+			do
+				create lst_media_choisis.with_capacity(1,0)
+				nom := nom_prenom.substring(1, nom_prenom.index_of('/',1)-1)
+				prenom := nom_prenom.substring(nom_prenom.index_of('/',1)+1, nom_prenom.last_index_of(nom_prenom.last))
+				if type_personne.is_equal("AUTEUR") then
+					from i:= 0
+					until i = lst_auteurs.count
+					loop
+						if (lst_auteurs.item(i).get_nom.is_equal(nom) 
+							and lst_auteurs.item(i).get_prenom.is_equal(prenom))
+							or lst_auteurs.item(i).get_nom.is_equal(nom) then
+							from j := 0
+							until j = lst_auteurs.item(i).get_lst_livres.count
+							loop
+								lst_media_choisis.add_last(lst_auteurs.item(i).get_lst_livres.item(j))
+								j := j+1
+							end
+						end
+						i:= i+1
+					end
+				end
+				if type_personne.is_equal("ACTEUR") then
+					from i:= 0
+					until i = lst_acteurs.count
+					loop
+						if (lst_acteurs.item(i).get_nom.is_equal(nom) 
+							and lst_acteurs.item(i).get_prenom.is_equal(prenom))
+							or lst_acteurs.item(i).get_nom.is_equal(nom) then
+							from j := 0
+							until j = lst_acteurs.item(i).get_lst_films.count
+							loop
+								lst_media_choisis.add_last(lst_acteurs.item(i).get_lst_films.item(j))
+								j := j+1
+							end
+						end
+						i:= i+1
+					end
+				end
+				if type_personne.is_equal("REALISATEUR") then
+					from i:= 0
+					until i = lst_realisateurs.count
+					loop
+						if (lst_realisateurs.item(i).get_nom.is_equal(nom) 
+							and lst_realisateurs.item(i).get_prenom.is_equal(prenom))
+							or lst_realisateurs.item(i).get_nom.is_equal(nom) then
+							from j := 0
+							until j = lst_realisateurs.item(i).get_lst_films.count
+							loop
+								lst_media_choisis.add_last(lst_realisateurs.item(i).get_lst_films.item(j))
+								j := j+1
+							end
+						end
+						i:= i+1
+					end
+				end
+				Result := lst_media_choisis.count
+			end
+				
+		rechercher_media_par_annee(annee: INTEGER) : INTEGER is
+			local
+				i : INTEGER
+			do
+				create lst_media_choisis.with_capacity(1,0)
+				from i:= 0
+				until i = lst_dvd.count
+				loop
+					if lst_dvd.item(i).get_annee = annee then
+						lst_media_choisis.add_last(lst_dvd.item(i))
+					end
+					i := i+1
+				end
+				Result := lst_media_choisis.count
+			end
+							
 
 end
 

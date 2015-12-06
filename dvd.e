@@ -80,27 +80,8 @@ feature {ANY}
 		end
 		
 	to_string : STRING is
-		local
-			rst : STRING
-			i : INTEGER
 		do
-			rst := ""
-			rst.append("DVD:{ titre:"+titre+" , nombre_exemplaire:"+nombre_exemplaires.to_string+" annee:"+annee.to_string+", lst_acteurs:")
-			from i:= 0
-			until i = lst_acteurs.count
-			loop
-				rst.append(lst_acteurs.item(i).to_string)
-				i := i+1
-			end
-			rst.append(", lst_realisateurs:")
-			from i:= 0
-			until i = lst_realisateurs.count
-			loop
-				rst.append(lst_realisateurs.item(i).to_string)
-				i := i+1
-			end
-			rst.append("}")
-			Result:= rst
+			Result := "DVD : "+titre
 		end
 
 end

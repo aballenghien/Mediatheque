@@ -28,6 +28,6 @@ feature {ANY}
 		
 	to_string : STRING is
 		do
-			Result := "LIVRE:{titre:"+titre+", nombre_exemplaires:"+nombre_exemplaires.to_string+", Auteur:"+auteur.to_string+"}"
+			Result := "LIVRE: "+titre
 		end
 end

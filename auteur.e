@@ -51,6 +51,11 @@ feature {ANY}
 			rst.append("}")
 			Result := rst
 		end
+		
+	get_lst_livres : ARRAY[LIVRE] is
+		do
+			Result := lst_livres
+		end
 			
 
 end
