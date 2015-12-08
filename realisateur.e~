@@ -1,12 +1,13 @@
-class ACTEUR inherit
+class REALISATEUR inherit
 	PERSONNE
 	rename make as make_personne
+	--redefine to_string
 	end
 
 creation{ANY}
 	make
 
-feature{}		
+feature{}
 	lst_films: ARRAY[DVD]
 
 feature {ANY}
@@ -15,8 +16,8 @@ feature {ANY}
 			make_personne
 			create lst_films.with_capacity(1,0)
 		end
-	
-	-- Fonction permettant d'ajouter un film à la liste des films de l'acteur
+		
+	-- Fonction permettant d'ajouter un film à la liste des films du réalisateur
 	ajouter_film (un_film: DVD) is
 		local
 			trouver : BOOLEAN
@@ -39,14 +40,13 @@ feature {ANY}
 			end
 		end
 		
-	-- Fonction permettant d'afficher les informations d'un acteur
 	to_string : STRING is
 		local
 			rst: STRING
 			i : INTEGER
 		do
 			rst := ""
-			rst.append("ACTEUR : {nom : "+nom+", prenom :"+prenom+", lst_films :")
+			rst.append("REALISATEUR : {nom : "+nom+", prenom :"+prenom+", lst_films : ")
 			from i:=0
 			until i = lst_films.count
 			loop
@@ -56,8 +56,8 @@ feature {ANY}
 			rst.append("}")
 			Result := rst
 		end
-	
-	-- Getter
+		
+	-- getter
 	get_lst_films : ARRAY[DVD] is
 		do
 			Result := lst_films

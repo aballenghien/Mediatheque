@@ -1,6 +1,7 @@
 class LIVRE inherit
 	MEDIA
 	rename make as make_media
+	--redefine to_string
 	end
 
 creation{ANY}

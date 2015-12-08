@@ -1,6 +1,7 @@
 class ACTEUR inherit
 	PERSONNE
 	rename make as make_personne
+	--redefine to_string
 	end
 
 creation{ANY}

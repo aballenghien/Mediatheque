@@ -91,7 +91,7 @@ feature {ANY}
 			Result:= annee
 		end
 		
-	get_type : STRING is
+	get_type : INTEGER is
 		do
 			Result:= type
 		end
