@@ -21,12 +21,17 @@ feature{ANY}
 			choix : STRING
 			correct : BOOLEAN
 		do
+			-- on affiche le menu tant que l'utilisateur n'a pas décidé 
+			-- de quitter
 			continuer := True
+			-- remplissage des listes
 			initialisation
+			-- connexion de l'utilisateur, instanciation de la variable utilisateur_connecte
 			connexion
 			from
 			until not continuer
 			loop
+				-- si un utilisateur est connecté
 				if utilisateur_connecte /= Void then
 					afficher_menu(utilisateur_connecte)
 					correct := False
@@ -34,7 +39,7 @@ feature{ANY}
 					from
 					until correct
 					loop
-						io.put_string("retour au menu ? O/N")
+						io.put_string("Retour au menu principal ? O/N (N = déconnexion)")
 						io.put_string("%N")
 						io.flush
 						io.read_line
@@ -48,35 +53,30 @@ feature{ANY}
 								continuer := False
 							end
 						else
-							io.put_string("O/N")
+							io.put_string("Retour au menu principal ? O/N (N = déconnexion)")
 							io.put_string("%N")
 						end
 					end
 				end
 			end
-					
-		
 		end
-		
+
+	-- fonction qui permet d'initialiser et remplir les listes
 	initialisation is
 		do
-		create lst_users.with_capacity(1, 0)
-			create lst_medias.with_capacity(1,0)
+			-- initilisation des listes
+			create lst_users.with_capacity(1, 0)
+		--	create lst_medias.with_capacity(1,0)
 			create lst_auteurs.with_capacity(1,0)
 			create lst_acteurs.with_capacity(1,0)
 			create lst_realisateurs.with_capacity(1,0)
 			create lst_livres.with_capacity(1,0)
 			create lst_dvd.with_capacity(1,0)
 			create lst_media_choisis.with_capacity(1,0)
+			-- remplissage des listes
 			remplir_lst_users
-		--	afficher_tableau(l"USER")
 			remplir_lst_medias
-		--	afficher_tableau("LIVRE")
-		--  afficher_tableau("dvd")
 			remplir_lst_auteurs_realisateurs_acteurs
-		--	afficher_tableau("AUTEUR")
-		--	afficher_tableau("ACTEUR")
-		--	afficher_tableau("REALISATEUR")
 		end
 
 --récupère tous les utilisateurs dans le fichier
@@ -187,16 +187,17 @@ feature{ANY}
 							
 			end
 		end
+	
 	--récupère tous les médias du fichier	
 	remplir_lst_medias is
 		local
-			ligne: STRING -- ligne du fichier utilisateur
+			ligne: STRING -- ligne du fichier média
 			fichier: TEXT_FILE_READ -- Fichier media ouvert en lecture
 			i, index_start, index_end: INTEGER
 			titre: STRING 
 			livre: LIVRE
 			dvd: DVD
-			ligne_tab : ARRAY[STRING]
+			ligne_tab : ARRAY[STRING] -- découpage de la ligne avec les points virgules
 			is_livre: BOOLEAN
 			auteur: AUTEUR
 			realisateur: REALISATEUR
@@ -288,21 +289,22 @@ feature{ANY}
 						end
 
 						--si la case indique un auteur, on assigne l'auteur au livre
-						if ligne_tab.item(i).has_substring("Auteur") then 
+						if ligne_tab.item(i).has_substring("Auteur") and is_livre then 
 							index_start := ligne_tab.item(i).index_of('<', 1)
 							index_end := ligne_tab.item(i).index_of(' ', index_start)
+							-- séparation du nom et prénom par l'espace
 							create auteur.make
 							auteur.set_prenom(ligne_tab.item(i).substring(index_start+1, index_end-1))
 						 	index_start := ligne_tab.item(i).index_of(' ', index_start)
 						 	index_end := ligne_tab.item(i).index_of('>', 1)
 						 	auteur.set_nom(ligne_tab.item(i).substring(index_start+1, index_end-1))
-							livre.set_auteur(auteur)
-							
+							livre.set_auteur(auteur)							
 						end
 						
 						--si la case indique un acteur, on ajoute l'acteur à la liste
-						if ligne_tab.item(i).has_substring("Acteur") then 
+						if ligne_tab.item(i).has_substring("Acteur") and not is_livre then 
 							index_start := ligne_tab.item(i).index_of('<', 1)
+							-- séparation du nom et prénom par l'espace
 							index_end := ligne_tab.item(i).index_of(' ', index_start)
 							create acteur.make
 							acteur.set_prenom(ligne_tab.item(i).substring(index_start+1, index_end-1))
@@ -313,9 +315,10 @@ feature{ANY}
 						end
 						
 						--si la case indique un réalisateur, on ajoute le réalisateur à la liste
-						if ligne_tab.item(i).has_substring("Realisateur") then 
+						if ligne_tab.item(i).has_substring("Realisateur") and not is_livre then 
 							index_start := ligne_tab.item(i).index_of('<', 1)
 							index_end := ligne_tab.item(i).index_of(' ', index_start)
+							-- séparation du nom et prénom par l'espace
 							create realisateur.make
 							realisateur.set_prenom(ligne_tab.item(i).substring(index_start+1, index_end-1))
 							index_start := ligne_tab.item(i).index_of(' ', index_start)
@@ -324,7 +327,7 @@ feature{ANY}
 							dvd.ajouter_realisateur(realisateur)
 						end
 						
-						if ligne_tab.item(i).has_substring("Annee") then 
+						if ligne_tab.item(i).has_substring("Annee") and not is_livre then 
 							index_start := ligne_tab.item(i).index_of('<', 1)
 							index_end := ligne_tab.item(i).index_of('>', index_start)
 							dvd.set_annee(ligne_tab.item(i).substring(index_start+1, index_end-1).to_integer)
@@ -332,29 +335,28 @@ feature{ANY}
 						i := i + 1
 					end
 					
-
-
 					-- Ajout du média dans le tableau
 					if is_livre then
-						lst_medias.add_last(livre)
+				--		lst_medias.add_last(livre)
 						lst_livres.add_last(livre)
 					else 
-						lst_medias.add_last(dvd)
+				--		lst_medias.add_last(dvd)
 						lst_dvd.add_last(dvd)
 					end					
-				end
-							
+				end							
 			end
 		end
 
 	
-		
+	-- parcours les listes des dvd et des livres pour récupérer les 
+	-- auteurs réalisateurs acteurs et remplir les trois listes correspondantes
 	remplir_lst_auteurs_realisateurs_acteurs is
 		local
 			i: INTEGER
 			un_dvd : DVD
 			un_livre : LIVRE
 		do
+			-- parcours de la liste des livres pour remplir la liste des auteurs
 			from i:= 0
 			until i = lst_livres.count
 			loop
@@ -362,6 +364,8 @@ feature{ANY}
 				remplir_lst_auteurs(un_livre)
 				i := i+1
 			end
+			-- parcours de la liste des dvd pour remplir la liste des 
+			-- acteurs et celle des réalisateurs
 			from i:= 0
 			until i = lst_dvd.count
 			loop
@@ -371,7 +375,8 @@ feature{ANY}
 				i := i+1
 			end
 		end
-		
+
+	--remplissage de la liste des auteurs
 	remplir_lst_auteurs (un_livre: LIVRE) is
 		local
 			un_auteur : AUTEUR
@@ -379,15 +384,22 @@ feature{ANY}
 		do
 			un_auteur := un_livre.get_auteur
 			if un_auteur /= Void then
+				-- on cherche si l'auteur existe déjà dans lst_auteurs
 				indice_trouver := verifier_lst_auteurs(un_auteur)
+				-- si c'est le cas, on lie le livre à l'auteur dans la 
+				-- liste auteur.lst_livres
 				if indice_trouver >=0 then
 					lst_auteurs.item(indice_trouver).ajouter_livre(un_livre)
 				else
+					-- sinon on lie le livre puis on ajoute l'auteur à la 
+					-- liste des auteurs
 					un_auteur.ajouter_livre(un_livre)
 					lst_auteurs.add_last(un_auteur)
 				end				
 			end
 		end
+
+	-- remplissage de la liste des acteurs
 	remplir_lst_acteurs(un_dvd : DVD) is
 		local
 			i : INTEGER
@@ -395,20 +407,26 @@ feature{ANY}
 			indice_trouver : INTEGER
 		do
 			acteurs := un_dvd.get_lst_acteurs
+			-- parcours de la listes des acteurs de chaque film
 			from i:= 0
 			until i = acteurs.count
 			loop
+				-- recherche de l'acteur dans la liste existante 
 				indice_trouver := verifier_lst_acteurs(acteurs.item(i))
+				-- s'il existe on lie le dvd à l'acteur dans la liste acteur.lst_films
 				if indice_trouver >= 0 then
 					lst_acteurs.item(indice_trouver).ajouter_film(un_dvd)
 				else
+					-- sinon on lie le dvd à l'acteur et on ajoute 
+					-- l'acteur à la liste des acteurs
 					acteurs.item(i).ajouter_film(un_dvd)
 					lst_acteurs.add_last(acteurs.item(i))
 				end
 				i:= i+1
 			end
 		end
-			
+
+	-- remplissage de la liste des réalisateurs
 	remplir_lst_realisateurs(un_dvd : DVD) is
 		local
 			i : INTEGER
@@ -590,9 +608,9 @@ feature{ANY}
 			io.put_string("%N")
 			io.put_string("1. Consulter la liste des médias")
 			io.put_string("%N")
-			io.put_string("2. Gérer mes réservations")
+			io.put_string("2. Rechercher un média")
 			io.put_string("%N")
-			io.put_string("3. Gérer les informations de mon compte")
+			io.put_string("3. Gérer mes réservations / mes emprunts")
 			io.put_string("%N")
 			
 			if un_utilisateur.is_admin then
@@ -602,6 +620,8 @@ feature{ANY}
 				io.put_string("%N")
 				io.put_string("6. Ajouter un utilisateur")
 				io.put_string("%N")
+				io.put_string("7. Ajouter un média")
+				io.put_string("%N")
 			end
 			
 			io.flush
@@ -609,12 +629,11 @@ feature{ANY}
 			choix.copy(io.last_string)
 			if choix.is_integer then
 				if choix.to_integer = 1 then
-					rechercher_media
-				
+					io.put_string("encore en cours de développement")
+					io.put_string("%N")
 				else
 					if choix.to_integer = 2 then
-						io.put_string("encore en cours de développement")
-						io.put_string("%N")
+						rechercher_media
 					else
 						if choix.to_integer = 3 then
 							io.put_string("encore en cours de développement")
@@ -632,6 +651,11 @@ feature{ANY}
 										if choix.to_integer = 6 then
 											io.put_string("encore en cours de développement")
 											io.put_string("%N")
+										else
+											if choix.to_integer = 7 then
+												io.put_string("encore en cours de développement")
+												io.put_string("%N")
+											end
 										end
 									end
 								end
@@ -739,7 +763,7 @@ feature{ANY}
 					io.put_string("%N")	
 					io.put_string("5. Je connais un réalisateur")
 					io.put_string("%N")	
-					io.put_string("6. Je commais l'année de la parution du DVD")
+					io.put_string("6. Je connais l'année de la parution du DVD")
 					io.put_string("%N")	
 					io.flush
 					io.read_line
