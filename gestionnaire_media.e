@@ -359,7 +359,38 @@ feature{ANY}
 			end
 			Result := rst
 		end
-		
+
+	verifier_lst_media(titre : STRING) : INTEGER is
+		local
+			i:INTEGER
+			rst: INTEGER
+		do
+			rst := -1
+			from i := 0
+			until i = lst_dvd.count
+			loop
+				-- test sur le titre du dvd
+				if lst_dvd.item(i).get_titre.is_equal(titre) then
+					-- s'il existe on retourne son indice dans le tableau
+					rst := i
+				end
+				i := i + 1
+			end
+			if rst = -1 then
+				from i := 0
+				until i = lst_livres.count
+				loop
+					-- test sur le titre du livre
+					if lst_livres.item(i).get_titre.is_equal(titre) then
+						-- s'il existe on retourne son indice dans le tableau
+						rst := i
+					end
+					i := i + 1
+				end
+			end
+			Result := rst
+		end
+	
 	-- fonction recherchant un média dans la liste des médias
 	rechercher_media is
 		local
@@ -721,7 +752,289 @@ feature{ANY}
 			end
 			Result := lst_media_choisis.count
 		end
+
+--afficher menu ajouter media
+	ajouter_media is
+		local
+			choix : INTEGER
+			correct : BOOLEAN
+		do
+			correct := False
+			from
+			until correct
+			loop				
+				io.put_string("1. Ajouter un DVD %N")
+				io.put_string("2. Ajouter un livre %N")
+				io.put_string("3. Retour au menu principal %N")
+				io.flush
+				io.read_integer
+				choix := io.last_integer
+						
+				if choix = 1 then
+					ajouter_dvd
+					correct := True
+				else
+					if choix = 2 then
+						ajouter_livre
+						correct := True
+					else
+						if choix = 3 then
+						    correct := True
+						else
+							io.put_string("Votre choix n'existe pas, Tapez 1,2 ou 3 %N")
+						end -- end 3
+					end -- end 2
+				end -- end 1
+			end -- end loop
+		end -- end fonction
 		
+
+ --ajouter un dvd   
+	ajouter_dvd is
+		local
+			titre, nom, prenom, type: STRING
+			ligne, choix : STRING
+			fichier : TEXT_FILE_WRITE
+			dvd : DVD
+			correct : BOOLEAN
+			indice : INTEGER
+			nb_exemplaires : INTEGER
+			annee : INTEGER
+			ajout : BOOLEAN
+			realisateur : REALISATEUR
+			acteur : ACTEUR
+			i : INTEGER
+		do
+			nom := ""
+			prenom := ""
+			titre := ""
+			type := ""
+			ligne := ""
+			choix := ""
+			nb_exemplaires := 1
+			
+			
+			io.put_string("*** Ajouter un nouveau DVD ***")
+			io.put_string("%N")
+
+			io.put_string("Titre du DVD ? ")
+			io.flush
+			io.read_line
+			io.read_line
+			titre.copy(io.last_string)
+			indice := verifier_lst_media(titre)
+			
+			if indice = -1 then
+			    create dvd.make			    
+			    dvd.set_titre(titre)
+			    
+			    correct := False
+			    from
+			    until correct
+			    loop
+				    io.put_string("Nombre d'exemplaires ? ")
+				    io.flush
+				    io.read_integer
+				    nb_exemplaires := io.last_integer
+				    if nb_exemplaires >= 0 and nb_exemplaires <= 1000 then
+				        dvd.set_nombre_exemplaires(nb_exemplaires)
+					    correct := True
+				    else
+						io.put_string("Veuillez taper un nombre")
+						io.put_string("%N")
+						correct := False
+				    end
+			    end	
+			    
+			    correct := False
+			    from
+			    until correct
+			    loop
+				    io.put_string("Année de sortie du DVD ? ")
+				    io.flush
+				    io.read_integer
+				    annee := io.last_integer
+				    if annee >= 1000 and annee <= 9999 then
+				        dvd.set_annee(annee)
+					    correct := True
+				    else
+						io.put_string("Veuillez taper une année sur 4 chiffres")
+						io.put_string("%N")
+						correct := False
+				    end
+			    end	
+				
+				
+				-- ajouter des réalisateurs
+				io.put_string("*** Ajout des réalisateurs *** %N")
+				ajout := True
+				from
+				until not ajout
+				loop
+				    create realisateur.make
+				    io.put_string("Nom ? ")
+				    io.flush
+				    io.read_line
+				    io.read_line
+				    nom.copy(io.last_string)
+				    realisateur.set_nom(nom)
+				    io.put_string("Prenom ? ")
+				    io.flush
+				    io.read_line
+				    prenom.copy(io.last_string)
+				    realisateur.set_prenom(prenom)
+				    dvd.ajouter_realisateur(realisateur)
+				    correct := False
+				    from
+				    until correct
+				    loop
+					    io.put_string("Souhaitez vous ajouter un autre réalisateur ? (O/N)")
+					    io.flush
+					    io.read_line
+					    choix.copy(io.last_string)
+					    if choix.is_equal("N") then
+					        ajout := False
+						    correct := True
+					    else
+						    if choix.is_equal("O") then
+						        ajout := True
+							    correct := True
+						    else
+							    io.put_string("Veuillez taper O pour Oui ou N %
+                                      %pour Non")
+							    io.put_string("%N")
+						    end
+					    end
+				    end	
+				end -- fin ajouter realisateur
+				
+				-- ajouter des acteurs
+				io.put_string("*** Ajout des acteurs *** %N")
+				ajout := True
+				from
+				until not ajout
+				loop
+				    create acteur.make
+				    io.put_string("Nom ? ")
+				    io.flush
+				    io.read_line
+				    nom.copy(io.last_string)
+				    acteur.set_nom(nom)
+				    io.put_string("Prenom ? ")
+				    io.flush
+				    io.read_line
+				    prenom.copy(io.last_string)
+				    acteur.set_prenom(prenom)
+				    dvd.ajouter_acteur(acteur)
+				    correct := False
+				    from
+				    until correct
+				    loop
+					    io.put_string("Souhaitez vous ajouter un autre acteur ? (O/N)")
+					    io.flush
+					    io.read_line
+					    choix.copy(io.last_string)
+					    if choix.is_equal("N") then
+					        ajout := False
+						    correct := True
+					    else
+						    if choix.is_equal("O") then
+						        ajout := True
+							    correct := True
+						    else
+							    io.put_string("Veuillez taper O pour Oui ou N %
+                                      %pour Non")
+							    io.put_string("%N")
+						    end
+					    end
+				    end	
+				end	-- fin ajouter acteur
+				
+				remplir_lst_realisateurs(dvd)
+				remplir_lst_acteurs(dvd)
+				lst_dvd.add_last(dvd)
+				
+				-- le dvd est-il un coffret ?
+				correct := False
+			    from
+			    until correct
+			    loop
+				    io.put_string("Le DVD est-il au format coffret ? (O/N) %N")
+				    io.flush
+				    io.read_line
+				    choix.copy(io.last_string)
+				    if choix.is_equal("N") then
+					    correct := True
+				    else
+					    if choix.is_equal("O") then
+					        dvd.set_type("Coffret")
+						    correct := True
+					    else
+						    io.put_string("Veuillez taper O pour Oui ou N %
+                                  %pour Non")
+						    io.put_string("%N")
+					    end
+				    end
+			    end
+				
+			else -- si dvd existe déjà
+				io.put_string("Le média existe déjà.")
+				correct := False
+				dvd := lst_dvd.item(indice)
+				from
+				until correct
+				loop
+					io.put_string("Souhaitez vous ajouter un exemplaire ? (O/N) %N")
+					io.flush
+					io.read_line
+					choix.copy(io.last_string)
+					if choix.is_equal("N") then
+						correct := True
+					else
+						if choix.is_equal("O") then
+						    lst_dvd.item(indice).set_nombre_exemplaires(lst_dvd.item(indice).get_nombre_exemplaires+1)
+							correct := True
+						else
+							io.put_string("Veuillez taper O pour Oui ou N %
+                                  %pour Non")
+							io.put_string("%N")
+						end
+					end
+				end
+			end -- fin if dvd existe
+			
+			ligne.append("DVD ; Titre<"+dvd.get_titre+"> ; Annee<"+dvd.get_annee.to_string+"> ; ")
+			from i:= 0
+			until i = dvd.get_lst_realisateurs.count
+			loop
+			    ligne.append("Realisateur<"+dvd.get_lst_realisateurs.item(i).get_prenom+" "+dvd.get_lst_realisateurs.item(i).get_nom+ ">; ")
+			    i := i + 1
+			end
+			from i:= 0
+			until i = dvd.get_lst_acteurs.count
+			loop
+			    ligne.append("Acteur<"+dvd.get_lst_acteurs.item(i).get_prenom+" "+dvd.get_lst_acteurs.item(i).get_nom+ ">; ")
+			    i := i + 1
+			end
+			if dvd.get_type.is_equal("Coffret") then
+			    ligne.append("Type<"+dvd.get_type+"> ; ")
+			end
+			if dvd.get_nombre_exemplaires > 1 then
+			    ligne.append("Nombre<"+dvd.get_nombre_exemplaires.to_string+">")
+			end
+			
+			create fichier.make
+			fichier.connect_for_appending_to("media2.txt")
+			fichier.put_line(ligne)
+			fichier.disconnect
+			 
+		end
+		
+	ajouter_livre is
+	    local
+	    do
+	    end	
+	
 	afficher_media_choisi is
 		local
 			i: INTEGER
@@ -734,6 +1047,7 @@ feature{ANY}
 				i := i+1
 			end
 		end
+	
 	get_lst_acteurs : ARRAY[ACTEUR] is
 		do
 			Result := lst_acteurs

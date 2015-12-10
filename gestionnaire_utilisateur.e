@@ -16,8 +16,29 @@ feature{ANY}
 	--récupère tous les utilisateurs dans le fichier
 	remplir_lst_users is
 		local
-			ligne: STRING -- ligne du fichier utilisateur
 			fichier: TEXT_FILE_READ -- Fichier utilisateur ouvert en lecture
+			fichier2: TEXT_FILE_READ -- fichier qui nous servira pour la suite
+		do	
+			-- Création et ouverture du fichier utilisateur.txt
+			create fichier.make
+			fichier.connect_to("utilisateurs.txt")
+			-- lecture du fichier
+			analyser_fichier(fichier)			
+			fichier.disconnect
+
+			-- Création et ouverture du fichier utilisateur2.txt
+			create fichier2.make
+			fichier2.connect_to("utilisateurs2.txt")
+			if fichier2.is_connected then			
+				-- lecture du fichier
+				analyser_fichier(fichier2)
+				fichier2.disconnect
+			end
+		end
+
+	analyser_fichier (fichier: TEXT_FILE_READ) is
+		local
+			ligne: STRING -- ligne du fichier utilisateur
 			i, index_start, index_end: INTEGER
 			nom, prenom, id, admin: STRING -- Attributs d'utilisateur
 			user: UTILISATEUR
@@ -29,13 +50,9 @@ feature{ANY}
 			nom := ""
 			prenom := ""
 			id := ""
-			admin := ""			
-			
-			-- Création et ouverture du fichier
-			create fichier.make
-			fichier.connect_to("utilisateurs.txt")
-			
-			-- lecture du fichier
+			admin := ""
+
+			-- lecture du fichier et analyse des lignes
 			from 
 			until fichier.end_of_input 
 			loop					
@@ -115,41 +132,73 @@ feature{ANY}
 					lst_users.add_last(user)
 				end		
 			end
-			fichier.disconnect
 		end
+	
 		
-		ajouter_utilisateur is
+	ajouter_utilisateur is
 		local
-			nom, prenom, identifiant, admin, ligne : STRING
+			nom, prenom, identifiant, admin, ligne, essai : STRING
 			admin_ok, id_ok : BOOLEAN
-			--fichier : TEXT_FILE_WRITE
+			fichier : TEXT_FILE_WRITE
 			utilisateur : UTILISATEUR
-			i: INTEGER
+			i, nb_essai: INTEGER
+			correct : BOOLEAN
 		do
 			nom := ""
 			prenom := ""
 			identifiant := ""
 			admin := ""
 			ligne := ""
+			essai := ""
 			admin_ok := False
-			id_ok := True
+			id_ok := False
 			
 			
 			io.put_string("*** Ajouter un nouvel utilisateur ***")
 			io.put_string("%N")
-				
-			io.put_string("Identifiant de l'utilisateur ? ")
-			io.flush
-			io.read_line
-			identifiant.copy(io.last_string)
-			
-			from i:= 0
-			until i = lst_users.count
+
+			from nb_essai := 0
+			until id_ok or nb_essai = 3
 			loop
-				if lst_users.item(i).get_identifiant.is_equal(identifiant) then
-					id_ok := False
+				id_ok := True
+				io.put_string("Identifiant de l'utilisateur ? ")
+				io.flush
+				io.read_line
+				identifiant.copy(io.last_string)
+			
+				from i:= 0
+				until i = lst_users.count
+				loop
+					if lst_users.item(i).get_identifiant.is_equal(identifiant) then
+						id_ok := False
+					end
+					i := i+1
 				end
-				i := i+1
+				
+				if not id_ok then
+					correct := False
+					from
+					until correct
+					loop
+						io.put_string("Voulez-vous réessayer ? (O/N)")
+						io.flush
+						io.read_line
+						essai.copy(io.last_string)
+						if essai.is_equal("N") then
+							nb_essai := 3
+							correct := True
+						else
+							if essai.is_equal("O") then
+								nb_essai := nb_essai + 1
+								correct := True
+							else
+								io.put_string("Veuillez taper O pour Oui ou N %
+                                      %pour Non")
+								io.put_string("%N")
+							end
+						end
+					end
+				end
 			end
 			
 			if id_ok = True then
@@ -182,10 +231,10 @@ feature{ANY}
 					ligne.append(" ; Admin<OUI>")
 				end
 			
-				--create fichier.make
-				--fichier.connect_to("utilisateurs.txt")
-				--fichier.put_line(ligne)
-				--fichier.disconnect
+				create fichier.make
+				fichier.connect_for_appending_to("utilisateurs2.txt")
+				fichier.put_line(ligne)
+				fichier.disconnect
 			
 				create utilisateur.make
 				utilisateur.set_nom(nom)

@@ -12,8 +12,6 @@ feature{ANY}
 	make is
 		local
 			continuer : BOOLEAN
-			choix : STRING
-			correct : BOOLEAN
 		do
 			create gestionnaire_utilisateur.make
 			create gestionnaire_media.make
@@ -30,30 +28,7 @@ feature{ANY}
 				-- si un utilisateur est connecté
 				if utilisateur_connecte /= Void then
 					-- on affiche le menu
-					afficher_menu(utilisateur_connecte)
-					correct := False
-					choix := ""
-					from
-					until correct
-					loop
-						io.put_string("Retour au menu principal ? O/N (N = déconnexion)")
-						io.put_string("%N")
-						io.flush
-						io.read_line
-						choix.copy(io.last_string)
-						choix.to_upper
-						if choix.is_equal("O") or choix.is_equal("N") then
-							correct := True
-							if choix.is_equal("O") then
-								continuer := True
-							else 
-								continuer := False
-							end
-						else
-							io.put_string("Retour au menu principal ? O/N (N = déconnexion)")
-							io.put_string("%N")
-						end
-					end
+					continuer := afficher_menu					
 				else
 					continuer := False
 				end
@@ -62,9 +37,7 @@ feature{ANY}
 
 	-- fonction qui permet d'initialiser et remplir les listes
 	initialisation is
-		do
-			-- initilisation des listes
-			
+		do			
 			-- remplissage des listes
 			gestionnaire_utilisateur.remplir_lst_users
 			gestionnaire_media.remplir_lst_medias
@@ -166,11 +139,13 @@ feature{ANY}
 		end
 
 	-- Fonction qui affiche le menu		
-	afficher_menu (un_utilisateur: UTILISATEUR) is
+	afficher_menu : BOOLEAN is
 		local
-			choix : STRING
+			choix : INTEGER
+			continuer: BOOLEAN
 		do
-			choix := ""
+			continuer := True
+			choix := 0
 			io.put_string("Que souhaitez vous faire ?")
 			io.put_string("%N")
 			io.put_string("1. Consulter la liste des médias")
@@ -180,7 +155,7 @@ feature{ANY}
 			io.put_string("3. Gérer mes réservations / mes emprunts")
 			io.put_string("%N")
 			
-			if un_utilisateur.is_admin then
+			if utilisateur_connecte.is_admin then
 				io.put_string("4. Consulter la liste des utilisateurs")
 				io.put_string("%N")
 				io.put_string("5. Modifier les informations d'un utilisateur")
@@ -189,58 +164,76 @@ feature{ANY}
 				io.put_string("%N")
 				io.put_string("7. Ajouter un média")
 				io.put_string("%N")
+				io.put_string("8. Déconnexion")
+				io.put_string("%N")
+			else
+				io.put_string("4. Déconnexion")
+				io.put_string("%N")
 			end
 			
 			io.flush
-			io.read_line
+			io.read_integer
 			-- on récupére ce que l'utilisateur à saisi
-			choix.copy(io.last_string)
-			if choix.is_integer then
-				if choix.to_integer = 1 then
+			choix := io.last_integer
+			
+			if choix < 9 and choix > 0 then
+				if choix = 1 then
 					afficher_tableau("LIVRE")
 					afficher_tableau("DVD")
 					--io.put_string("En cours de développement...")
 					io.put_string("%N")
 				else
-					if choix.to_integer = 2 then
+					if choix = 2 then
 						gestionnaire_media.rechercher_media
 					else
-						if choix.to_integer = 3 then
+						if choix = 3 then
 							io.put_string("En cours de développement...")
 							io.put_string("%N")
 						else
-							if un_utilisateur.is_admin then
-								if choix.to_integer = 4 then
-									afficher_tableau("USER")
-									--io.put_string("En cours de développement...")
-									io.put_string("%N")
-								else
-									if choix.to_integer = 5 then
-										io.put_string("En cours de développement...")
+							if not utilisateur_connecte.is_admin and choix = 4 then
+								io.put_string("Deconnexion")
+								io.put_string("%N")
+								continuer := False
+							else
+								if utilisateur_connecte.is_admin then
+									if choix = 4 then
+										afficher_tableau("USER")
+										--io.put_string("En cours de développement...")
 										io.put_string("%N")
 									else
-										if choix.to_integer = 6 then
-											gestionnaire_utilisateur.ajouter_utilisateur
+										if choix = 5 then
+											io.put_string("En cours de développement...")
 											io.put_string("%N")
 										else
-											if choix.to_integer = 7 then
-												io.put_string("En cours de développement...")
+											if choix = 6 then
+												gestionnaire_utilisateur.ajouter_utilisateur
 												io.put_string("%N")
-											end
-										end
-									end
-								end
-							else
-								io.put_string("Vous n'êtes pas autorisé à exécuter cette action.")
-								io.put_string("%N")
-							end
-						end
-					end
-				end
+											else
+												if choix = 7 then
+													gestionnaire_media.ajouter_media
+												else
+													if choix = 8 then
+														io.put_string("Deconnexion")
+														io.put_string("%N")
+														continuer := False
+													end -- end if 8
+												end -- end if 7
+											end -- end if 6
+										end -- end if 5
+									end -- end if 4 
+								else
+									io.put_string("Vous n'êtes pas autorisé à exécuter cette action.")
+									io.put_string("%N")
+								end -- end if admin
+							end -- end if 4 non admin
+						end -- end if 3
+					end -- end if 2
+				end -- end if 1
 			else
-				io.put_string("Veuillez choisir un chiffre entre 1 et 7")
+				io.put_string("Veuillez choisir un chiffre entre 1 et 8")
 				io.put_string("%N")
-			end
+			end -- end if
+			Result := continuer
 		end
 		
 	-- Fonctino effectuant la connextion d'un utilisateur
@@ -269,16 +262,6 @@ feature{ANY}
 				utilisateur_connecte := gestionnaire_utilisateur.rechercher_utilisateur(identifiant)
 				if utilisateur_connecte /=Void then
 					connexion_ok := True
-				--	io.put_string("Mot de passe pour "+identifiant +":")
-				--	io.flush
-				--	io.read_line
-				--	mot_de_passe.copy(io.last_string)
-				--	if mot_de_passe.is_equal("test") then
-				--		connexion_ok := True
-				--	else
-				--		io.put_string("Mot de passe invalide")
-				--		io.put_string("%N")
-				--	end
 				else
 					io.put_string("Identifiant non reconnu")
 					io.put_string("%N")
@@ -289,7 +272,6 @@ feature{ANY}
 			if connexion_ok then
 				io.put_string("Bienvenue "+utilisateur_connecte.get_prenom+" ! ")
 				io.put_string("%N")
-				afficher_menu(utilisateur_connecte)
 			else
 				io.put_string("%N")
 				io.put_string("Vous avez utilisez vos 3 essais. Votre compte a été bloqué, veuillez contacter un administrateur de la médiathèque pour pouvoir vous reconnecter")
