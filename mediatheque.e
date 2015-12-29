@@ -51,6 +51,11 @@ feature{ANY}
 		do
 			-- Affichage du tableau des utilisateurs
 			if lst.is_equal("USER") then
+				io.put_string("********************************")
+				io.put_string("%N")
+				io.put_string("*    Liste des utilisateurs    *")
+				io.put_string("%N")
+				io.put_string("********************************")
 				io.put_string("%N")
 				from i:= 0
 				until i = gestionnaire_utilisateur.get_lst_users.count
@@ -63,7 +68,11 @@ feature{ANY}
 			
 			-- Affichage du tableau des livres
 			if lst.is_equal("LIVRE") then
-				io.put_string("Affichage des livres : ")
+				io.put_string("********************************")
+				io.put_string("%N")
+				io.put_string("*       Liste des livres       *")
+				io.put_string("%N")
+				io.put_string("********************************")
 				io.put_string("%N")
 				from i:= 0
 				until i = gestionnaire_media.get_lst_livres.count
@@ -76,7 +85,11 @@ feature{ANY}
 			
 			-- Afficheage du tableau des DVD
 			if lst.is_equal("DVD") then
-				io.put_string("Affichage des DVD : ")
+				io.put_string("********************************")
+				io.put_string("%N")
+				io.put_string("*         Liste des DVD        *")
+				io.put_string("%N")
+				io.put_string("********************************")
 				io.put_string("%N")
 				from i:= 0
 				until i = gestionnaire_media.get_lst_dvd.count
@@ -89,7 +102,11 @@ feature{ANY}
 			
 			-- Affichage du tableau des acteurs
 			if lst.is_equal("ACTEUR") then
-				io.put_string("Affichage des acteurs : ")
+				io.put_string("********************************")
+				io.put_string("%N")
+				io.put_string("*      Liste des acteurs       *")
+				io.put_string("%N")
+				io.put_string("********************************")
 				io.put_string("%N")
 				from i:= 0
 				until i = gestionnaire_media.get_lst_acteurs.count
@@ -102,7 +119,11 @@ feature{ANY}
 			
 			-- Affichage du tableau des auteurs
 			if lst.is_equal("AUTEUR") then
-				io.put_string("Affichage des auteurs : ")
+				io.put_string("********************************")
+				io.put_string("%N")
+				io.put_string("*       Liste des auteurs      *")
+				io.put_string("%N")
+				io.put_string("********************************")
 				io.put_string("%N")
 				from i:= 0
 				until i = gestionnaire_media.get_lst_auteurs.count
@@ -115,12 +136,40 @@ feature{ANY}
 			
 			-- Affichage du tableau des réalisateurs
 			if lst.is_equal("REALISATEUR") then
-				io.put_string("Affichage des realisateurs : ")
+				io.put_string("********************************")
+				io.put_string("%N")
+				io.put_string("*    Liste des réalisateurs    *")
+				io.put_string("%N")
+				io.put_string("********************************")
 				io.put_string("%N")
 				from i:= 0
 				until i = gestionnaire_media.get_lst_realisateurs.count
 				loop
 					io.put_string(gestionnaire_media.get_lst_realisateurs.item(i).to_string)
+					io.put_string("%N")
+					i := i+1
+				end
+			end
+			
+			-- Affichage des médias 
+			if lst.is_equal("MEDIA") then
+				io.put_string("********************************")
+				io.put_string("%N")
+				io.put_string("*       Liste des médias       *")
+				io.put_string("%N")
+				io.put_string("********************************")
+				io.put_string("%N")
+				from i:= 0
+				until i = gestionnaire_media.get_lst_dvd.count
+				loop
+					io.put_string(gestionnaire_media.get_lst_dvd.item(i).to_string)
+					io.put_string("%N")
+					i := i+1
+				end
+				from i:= 0
+				until i = gestionnaire_media.get_lst_livres.count
+				loop
+					io.put_string(gestionnaire_media.get_lst_livres.item(i).to_string)
 					io.put_string("%N")
 					i := i+1
 				end
@@ -146,15 +195,21 @@ feature{ANY}
 		do
 			continuer := True
 			choix := 0
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*        MENU PRINCIPAL        *")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
 			io.put_string("Que souhaitez vous faire ?")
 			io.put_string("%N")
-			io.put_string("1. Consulter la liste des médias")
+			io.put_string("1. Consultation")
 			io.put_string("%N")
 			io.put_string("2. Rechercher un média")
 			io.put_string("%N")
 			io.put_string("3. Gérer mes réservations / mes emprunts")
-			io.put_string("%N")
-			
+			io.put_string("%N")			
 			if utilisateur_connecte.is_admin then
 				io.put_string("4. Consulter la liste des utilisateurs")
 				io.put_string("%N")
@@ -176,79 +231,145 @@ feature{ANY}
 			-- on récupére ce que l'utilisateur à saisi
 			choix := io.last_integer
 			
-			if choix < 9 and choix > 0 then
-				if choix = 1 then
-					afficher_tableau("LIVRE")
-					afficher_tableau("DVD")
-					--io.put_string("En cours de développement...")
-					io.put_string("%N")
-				else
-					if choix = 2 then
+			if not utilisateur_connecte.is_admin then
+				if choix > 0 and choix < 5 then
+					inspect choix
+					when 1 then
+						afficher_menu_consultation
+					when 2 then
 						gestionnaire_media.rechercher_media
-					else
-						if choix = 3 then
-							io.put_string("En cours de développement...")
-							io.put_string("%N")
-						else
-							if not utilisateur_connecte.is_admin and choix = 4 then
-								io.put_string("Deconnexion")
-								io.put_string("%N")
-								continuer := False
-							else
-								if utilisateur_connecte.is_admin then
-									if choix = 4 then
-										afficher_tableau("USER")
-										--io.put_string("En cours de développement...")
-										io.put_string("%N")
-									else
-										if choix = 5 then
-											io.put_string("En cours de développement...")
-											io.put_string("%N")
-										else
-											if choix = 6 then
-												gestionnaire_utilisateur.ajouter_utilisateur
-												io.put_string("%N")
-											else
-												if choix = 7 then
-													gestionnaire_media.ajouter_media
-												else
-													if choix = 8 then
-														io.put_string("Deconnexion")
-														io.put_string("%N")
-														continuer := False
-													end -- end if 8
-												end -- end if 7
-											end -- end if 6
-										end -- end if 5
-									end -- end if 4 
-								else
-									io.put_string("Vous n'êtes pas autorisé à exécuter cette action.")
-									io.put_string("%N")
-								end -- end if admin
-							end -- end if 4 non admin
-						end -- end if 3
-					end -- end if 2
-				end -- end if 1
-			else
-				io.put_string("Veuillez choisir un chiffre entre 1 et 8")
-				io.put_string("%N")
-			end -- end if
+					when 3 then
+						io.put_string("En cours de développement...")
+						io.put_string("%N")
+					when 4 then
+						io.put_string("Déconnexion")
+						io.put_string("%N")
+						continuer := False
+					end
+				else
+					io.put_string("Veuillez choisir un chiffre entre 1 et 4")
+					io.put_string("%N")
+				end
+			elseif utilisateur_connecte.is_admin then
+				if choix > 0 and choix < 9 then
+					inspect choix
+					when 1 then
+						afficher_menu_consultation
+					when 2 then
+						gestionnaire_media.rechercher_media
+					when 3 then
+						io.put_string("En cours de développement...")
+						io.put_string("%N")
+					when 4 then
+						afficher_tableau("USER")
+						io.put_string("%N")
+					when 5 then
+						io.put_string("En cours de développement...")
+						io.put_string("%N")
+					when 6 then
+						gestionnaire_utilisateur.ajouter_utilisateur
+						io.put_string("%N")
+					when 7 then
+						gestionnaire_media.ajouter_media
+					when 8 then
+						io.put_string("Déconnexion")
+						io.put_string("%N")
+						continuer := False
+					end
+				else
+					io.put_string("Veuillez choisir un chiffre entre 1 et 8")
+					io.put_string("%N")
+				end
+			end
+			
 			Result := continuer
 		end
 		
+	afficher_menu_consultation is
+		local
+			choix : INTEGER
+			continuer : BOOLEAN
+		do		
+			choix := 0
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*       MENU CONSULTATION      *")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("Que souhaitez vous faire ?")
+			io.put_string("%N")
+			io.put_string("1. Consulter la liste des médias")
+			io.put_string("%N")
+			io.put_string("2. Consulter la liste des livres")
+			io.put_string("%N")
+			io.put_string("3. Consulter la liste des auteurs")
+			io.put_string("%N")
+			io.put_string("4. Consulter la liste des DVD")
+			io.put_string("%N")
+			io.put_string("5. Consulter la liste des acteurs")
+			io.put_string("%N")
+			io.put_string("6. Consulter la liste des réalisateurs")
+			io.put_string("%N")
+			io.put_string("7. Retour ")
+			io.put_string("%N")
+			
+			io.flush
+			io.read_integer
+			-- on récupére ce que l'utilisateur à saisi
+			choix := io.last_integer
+			
+			if choix > 0 and choix < 8 then
+				inspect choix
+				when 1 then
+					afficher_tableau("MEDIA")
+					io.put_string("%N")
+				when 2 then
+					afficher_tableau("LIVRE")
+					io.put_string("%N")
+				when 3 then
+					afficher_tableau("AUTEUR")
+					io.put_string("%N")
+				when 4 then
+					afficher_tableau("DVD")
+					io.put_string("%N")
+				when 5 then 
+					afficher_tableau("ACTEUR")
+					io.put_string("%N")
+				when 6 then
+					afficher_tableau("REALISATEUR")
+					io.put_string("%N")
+				when 7 then 
+					continuer := afficher_menu
+				else
+					io.put_string("Vous n'êtes pas autorisé à exécuter cette action.")
+					io.put_string("%N")
+				end
+			else
+				io.put_string("Veuillez choisir un chiffre entre 1 et 7")
+				io.put_string("%N")
+			end	
+		end	
+	
 	-- Fonctino effectuant la connextion d'un utilisateur
 	connexion is
 		local 
 			identifiant : STRING
-			mot_de_passe : STRING
 			compteur : INTEGER
 			connexion_ok : BOOLEAN
 		do
 			connexion_ok := False
 			identifiant := ""
-			mot_de_passe := ""
-			io.put_string("*** CONNEXION ***")
+			
 			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*           CONNEXION          *")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			
 			-- l'utilisateur à 3 essais pour ce connecter
 			from compteur := 0
 			until compteur = 3 or connexion_ok
@@ -263,7 +384,7 @@ feature{ANY}
 				if utilisateur_connecte /=Void then
 					connexion_ok := True
 				else
-					io.put_string("Identifiant non reconnu")
+					io.put_string("L'identifiant saisi n'est pas reconnu")
 					io.put_string("%N")
 				end
 				compteur := compteur + 1
@@ -274,7 +395,7 @@ feature{ANY}
 				io.put_string("%N")
 			else
 				io.put_string("%N")
-				io.put_string("Vous avez utilisez vos 3 essais. Votre compte a été bloqué, veuillez contacter un administrateur de la médiathèque pour pouvoir vous reconnecter")
+				io.put_string("Vous avez utilisez vos 3 essais, vous ne pouvez pas vous connecter.")
 				io.put_string("%N")
 			end
 		end

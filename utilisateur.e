@@ -20,7 +20,7 @@ feature{ANY}
 
 	to_string : STRING is
 		do
-			Result:= "UTILISATEUR : {nom : "+nom+", prenom : "+prenom+", identifiant : "+identifiant+"}"
+			Result:= "UTILISATEUR :  %N %T Nom : "+nom+" %N %T Prénom : "+prenom+" %N %T Identifiant : "+identifiant
 		end
 
 	-- getter et setter

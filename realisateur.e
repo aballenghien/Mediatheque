@@ -45,14 +45,13 @@ feature {ANY}
 			i : INTEGER
 		do
 			rst := ""
-			rst.append("REALISATEUR : {nom : "+nom+", prenom :"+prenom+", lst_films : ")
+			rst.append("REALISATEUR :  %N %T Nom : "+nom+" %N %T Prénom :"+prenom+" %N %T Liste des films associés : ")
 			from i:=0
 			until i = lst_films.count
 			loop
-				rst.append(lst_films.item(i).get_titre+" ,")
+				rst.append(" %N %T %T - "+lst_films.item(i).get_titre)
 				i:= i+1
 			end
-			rst.append("}")
 			Result := rst
 		end
 		

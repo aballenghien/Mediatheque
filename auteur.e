@@ -46,14 +46,13 @@ feature {ANY}
 			i : INTEGER
 		do
 			rst := ""
-			rst.append("AUTEUR : {nom : "+nom+", prenom :"+prenom+", lst_livres :")
+			rst.append("AUTEUR : %N %T Nom : "+nom+" %N %T Prénom :"+prenom+" %N %T Liste des livres associés :")
 			from i:=0
 			until i = lst_livres.count
 			loop
-				rst.append(lst_livres.item(i).get_titre+" ,")
+				rst.append(" %N %T %T -"+lst_livres.item(i).get_titre)
 				i:= i+1
 			end
-			rst.append("}")
 			Result := rst
 		end
 		

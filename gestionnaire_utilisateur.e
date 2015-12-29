@@ -151,10 +151,15 @@ feature{ANY}
 			ligne := ""
 			essai := ""
 			admin_ok := False
-			id_ok := False
+			id_ok := False			
 			
 			
-			io.put_string("*** Ajouter un nouvel utilisateur ***")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*     AJOUTER UTILISATEUR      *")
+			io.put_string("%N")
+			io.put_string("********************************")
 			io.put_string("%N")
 
 			from nb_essai := 0
@@ -164,8 +169,10 @@ feature{ANY}
 				io.put_string("Identifiant de l'utilisateur ? ")
 				io.flush
 				io.read_line
+				if nb_essai = 0 then
+					io.read_line
+				end
 				identifiant.copy(io.last_string)
-			
 				from i:= 0
 				until i = lst_users.count
 				loop
@@ -177,24 +184,29 @@ feature{ANY}
 				
 				if not id_ok then
 					correct := False
-					from
-					until correct
-					loop
-						io.put_string("Voulez-vous réessayer ? (O/N)")
-						io.flush
-						io.read_line
-						essai.copy(io.last_string)
-						if essai.is_equal("N") then
-							nb_essai := 3
-							correct := True
-						else
-							if essai.is_equal("O") then
-								nb_essai := nb_essai + 1
+					nb_essai := nb_essai + 1
+					if nb_essai = 3 then
+						correct := True
+						io.put_string("Vous avez utilisé vos 3 essais.")
+					else 
+						from
+						until correct
+						loop
+							io.put_string("L'identifiant existe déjà. Voulez-vous réessayer ? (O/N) ")
+							io.flush
+							io.read_line
+							essai.copy(io.last_string)
+							if essai.is_equal("N") then
+								nb_essai := 3
 								correct := True
 							else
-								io.put_string("Veuillez taper O pour Oui ou N %
-                                      %pour Non")
-								io.put_string("%N")
+								if essai.is_equal("O") then
+									correct := True
+								else
+									io.put_string("Veuillez taper O pour Oui ou N %
+		                                  %pour Non")
+									io.put_string("%N")
+								end
 							end
 						end
 					end
@@ -246,10 +258,9 @@ feature{ANY}
 				end
 				lst_users.add_last(utilisateur)
 			
-				io.put_string("Nouvel utilisateur ajouté : ")
-				io.put_string(ligne)
-			else
-				io.put_string("L'identifiant est déjà utilisé, impossible d'ajouter l'utilisateur.")
+				io.put_string("Nouvel utilisateur ajouté ! ")
+				io.put_string("%N")
+				io.put_string(utilisateur.to_string)
 			end
 		end
 		

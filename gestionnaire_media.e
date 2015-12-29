@@ -14,7 +14,6 @@ feature{}
 
 feature{ANY}
 	make is
-	
 		do
 			create lst_auteurs.with_capacity(1,0)
 			create lst_acteurs.with_capacity(1,0)
@@ -394,16 +393,22 @@ feature{ANY}
 	-- fonction recherchant un média dans la liste des médias
 	rechercher_media is
 		local
-			choix : STRING
+			choix : INTEGER
 			reponse: STRING
 			correct : BOOLEAN
 			scorrect : BOOLEAN
 			resultat : INTEGER
 			type : STRING
+			retour : BOOLEAN
+			reponse_int : INTEGER
 		do
 			correct := False
-			choix := ""
+			retour := False
+			choix := 0
 			reponse := ""
+			reponse_int := 0
+			resultat := 0
+			
 			from
 			until correct
 			loop
@@ -422,50 +427,54 @@ feature{ANY}
 				io.put_string("%N")	
 				io.put_string("6. Je connais l'année de la parution du DVD")
 				io.put_string("%N")	
+				io.put_string("7. Retour")
+				io.put_string("%N")	
+	
 				io.flush
-				io.read_line
-				choix.copy(io.last_string)
-				resultat := 0
-				if choix.is_integer then
+				io.read_integer
+				choix := io.last_integer
+
+				if choix > 0 and choix < 9 then
+					correct :=True
+					inspect choix
 					-- Pour le choix 1, recherche par type
-					if choix.to_integer = 1 then
+					when 1 then
 						scorrect := False
-						correct := True
 						from 
 						until scorrect
 						loop
 							io.put_string("Vous recherchez : 1: Un DVD, 2: Un Livre ?")
 							io.put_string("%N")
 							io.flush
-							io.read_line
-							reponse.copy(io.last_string)
-							if reponse.to_integer = 1 then
+							io.read_integer
+							reponse_int := io.last_integer
+							if reponse_int = 1 then
 								scorrect := True
 								type := "DVD"
 							end
-							if reponse.to_integer = 2 then
+							if reponse_int = 2 then
 								scorrect := True
 								type := "LIVRE"
 							end
 						end
 						resultat := rechercher_media_par_type(type)
-					end
+						
 					-- Choix 2, recherche par titre (DVD et livre)
-					if choix.to_integer = 2 then
-						correct := True
+					when 2 then
 						io.put_string("Donnez le titre ou une partie du titre:")
 						io.put_string("%N")
 						io.flush
 						io.read_line
+						io.read_line
 						reponse.copy(io.last_string)
 						resultat := rechercher_media_par_titre(reponse)
-					end 
+
 					-- choix 3, recherche par acteur
-					if choix.to_integer = 3 then
-						correct:= True
+					when 3 then
 						io.put_string("Donnez le nom et/ou le prenom de l'acteur (au format nom/prenom)")
 						io.put_string("%N")
 						io.flush
+						io.read_line
 						io.read_line
 						reponse.copy(io.last_string)
 						scorrect := False
@@ -483,13 +492,13 @@ feature{ANY}
 							end
 						end	
 						resultat := rechercher_media_par_personne("ACTEUR",reponse)
-					end
+
 					-- choix 4, recherche par auteur
-					if choix.to_integer = 4 then
-						correct:= True
+					when 4 then
 						io.put_string("Donnez le nom et/ou le prenom de l'auteur (au format nom/prenom)")
 						io.put_string("%N")
 						io.flush
+						io.read_line
 						io.read_line
 						reponse.copy(io.last_string)
 						scorrect := False
@@ -507,13 +516,13 @@ feature{ANY}
 							end
 						end	
 						resultat := rechercher_media_par_personne("AUTEUR",reponse)
-					end
+
 					-- choix 5, recherche par réalisateur
-					if choix.to_integer = 5 then
-						correct:= True
+					when 5 then
 						io.put_string("Donnez le nom et/ou le prenom du réalisateur (au format nom/prenom)")
 						io.put_string("%N")
 						io.flush
+						io.read_line
 						io.read_line
 						reponse.copy(io.last_string)
 						scorrect := False
@@ -531,43 +540,47 @@ feature{ANY}
 							end
 						end	
 						resultat := rechercher_media_par_personne("REALISATEUR",reponse)
-					end
+
 					-- choix6 ,recherche par année
-					if choix.to_integer = 6 then
-						scorrect := False
-						correct :=True
+					when 6 then
 						from
 						until scorrect
 						loop
 							io.put_string("En quel année est sortie le DVD ?")
 							io.put_string("%N")
 							io.flush
-							io.read_line
-							reponse.copy(io.last_string)
-							if reponse.is_integer and reponse.to_integer > 1000 and reponse.to_integer < 9999 then
+							io.read_integer
+							reponse_int := io.last_integer
+							if reponse_int > 1000 and reponse_int < 9999 then
 								scorrect := True
 							else
 								io.put_string("Donnez une année sur quatres chiffres")
 								io.put_string("%N")
 							end
 						end
-						resultat := rechercher_media_par_annee(reponse.to_integer)
+						resultat := rechercher_media_par_annee(reponse_int)
 						
-					end
-					-- Si le nombre saisi n'est pas entre 0 et 6, on affiche un message d'erreur
-					if choix.to_integer <= 0 or choix.to_integer > 6 then
-						correct := False
-						io.put_string("Aucune action ne correspond à ce choix !")
-						io.put_string("%N")
+					when 7 then
+						retour := True	
 					end
 				else
-					io.put_string("Veuillez choisir")
+					io.put_string("Veuillez choisir un chiffre entre 1 et 7")
 					io.put_string("%N")
 				end
 			end
-			io.put_string("Nous avons trouvé "+resultat.to_string+" médias correspondants à votre recherche :")
-			io.put_string("%N")
-			afficher_media_choisi
+			if retour = False then
+				io.put_string("%N")
+				io.put_string("********************************")
+				io.put_string("%N")
+				io.put_string("*      RESULTAT RECHERCHE      *")
+				io.put_string("%N")
+				io.put_string("********************************")
+				io.put_string("%N")
+				io.put_string("Nous avons trouvé "+resultat.to_string+" médias correspondants à votre recherche :")
+				io.put_string("%N")
+				afficher_media_choisi
+				io.put_string("%N")
+			end
 		end
 		
 	-- Cherche les médias par type
@@ -770,21 +783,20 @@ feature{ANY}
 				io.read_integer
 				choix := io.last_integer
 						
-				if choix = 1 then
-					ajouter_dvd
-					correct := True
-				else
-					if choix = 2 then
+				if choix > 0 and choix < 4 then
+					inspect choix
+					when 1 then 
+						ajouter_dvd
+						correct := True					
+					when 2 then
 						ajouter_livre
-						correct := True
-					else
-						if choix = 3 then
-						    correct := True
-						else
-							io.put_string("Votre choix n'existe pas, Tapez 1,2 ou 3 %N")
-						end -- end 3
-					end -- end 2
-				end -- end 1
+						correct := True					
+					when 3 then
+						correct := True					
+					end -- end inspect
+				else
+					io.put_string("Votre choix n'existe pas, Tapez 1,2 ou 3 %N")
+				end -- end if
 			end -- end loop
 		end -- end fonction
 		
@@ -1042,6 +1054,7 @@ feature{ANY}
 			from i:= 0
 			until i = lst_media_choisis.count
 			loop
+				io.put_string("%T -")
 				io.put_string(lst_media_choisis.item(i).to_string)
 				io.put_string("%N")
 				i := i+1
