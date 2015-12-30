@@ -401,6 +401,7 @@ feature{ANY}
 			type : STRING
 			retour : BOOLEAN
 			reponse_int : INTEGER
+			media : INTEGER
 		do
 			correct := False
 			retour := False
@@ -408,6 +409,7 @@ feature{ANY}
 			reponse := ""
 			reponse_int := 0
 			resultat := 0
+			media := 0
 			
 			from
 			until correct
@@ -580,6 +582,25 @@ feature{ANY}
 				io.put_string("%N")
 				afficher_media_choisi
 				io.put_string("%N")
+				io.put_string("1. Consulter détail")
+				io.put_string("%N")
+				io.put_string("2. Retour")
+				io.put_string("%N")
+				io.flush
+				io.read_integer
+				reponse_int := io.last_integer
+				if reponse_int > 0 and reponse_int < 3 then
+					if reponse_int = 1 then
+						io.put_string("Sur quel média voulez vous plus de détails ? (saisissez son numéro) %N")
+						io.flush
+						io.read_integer
+						media := io.last_integer
+						afficher_detail_media(media)
+					end
+				else
+					io.put_string("Veuillez taper soit 1 soit 2")
+					io.put_string("%N")
+				end
 			end
 		end
 		
@@ -1051,14 +1072,92 @@ feature{ANY}
 		local
 			i: INTEGER
 		do
-			from i:= 0
+			from i:= 1
 			until i = lst_media_choisis.count
 			loop
-				io.put_string("%T -")
+				io.put_string("%T "+i.to_string+" -")
 				io.put_string(lst_media_choisis.item(i).to_string)
 				io.put_string("%N")
 				i := i+1
 			end
+		end
+		
+	afficher_detail_media(choix_media : INTEGER) is
+		local
+			livre : LIVRE
+			dvd : DVD
+			i,j : INTEGER
+		do
+			from i:= 0
+			until i = lst_media_choisis.count
+			loop
+				if i = choix_media then
+					if lst_media_choisis.item(i).to_string.has_substring("Livre") then
+						from j:= 0
+						until j = lst_livres.count
+						loop
+							if lst_livres.item(j).get_titre = lst_media_choisis.item(i).get_titre then
+								livre := lst_livres.item(j)
+							end
+							j := j+1
+						end
+					else 
+						from j:= 0
+						until j = lst_dvd.count
+						loop
+							if lst_dvd.item(j).get_titre = lst_media_choisis.item(i).get_titre then
+								dvd := lst_dvd.item(j)
+							end
+							j := j+1
+						end
+					end
+				end
+				i := i+1
+			end
+			
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*      DETAIL MEDIA CHOISI     *")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			if livre /= Void then
+				io.put_string("Titre : "+livre.get_titre)
+				io.put_string("%N")
+				io.put_string("Auteur : "+livre.get_auteur.to_string)
+				io.put_string("%N")
+				io.put_string("Nombre d'exemplaire : ")
+				io.put_integer(livre.get_nombre_exemplaires)
+				io.put_string("%N")
+			else
+				io.put_string("Titre : "+dvd.get_titre)
+				io.put_string("%N")
+				io.put_string("Année de parution : ")
+				io.put_integer(dvd.get_annee)
+				io.put_string("%N")
+				io.put_string("Nombre d'exemplaire : ")
+				io.put_integer(dvd.get_nombre_exemplaires)
+				io.put_string("%N")
+				io.put_string("*** Liste des acteur ***")
+				from i:= 0
+				until i = dvd.get_lst_acteurs.count
+				loop
+					io.put_string(dvd.get_lst_acteurs.item(i).to_string)
+					io.put_string("%N")
+					i := i+1
+				end
+				io.put_string("%N")
+				io.put_string("*** Liste des réalisateurs ***")
+				from i:= 0
+				until i = dvd.get_lst_realisateurs.count
+				loop
+					io.put_string(dvd.get_lst_realisateurs.item(i).to_string)
+					io.put_string("%N")
+					i := i+1
+				end
+			end
+					
 		end
 	
 	get_lst_acteurs : ARRAY[ACTEUR] is
