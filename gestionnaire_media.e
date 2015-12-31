@@ -26,8 +26,25 @@ feature{ANY}
 	-- récupère tous les médias du fichier	
 	remplir_lst_medias is
 		local
-			ligne: STRING -- ligne du fichier média
 			fichier: TEXT_FILE_READ -- Fichier media ouvert en lecture
+			fichier2: TEXT_FILE_READ -- Fichier media ouvert en lecture
+		do			
+			-- Création et ouverture du fichier
+			create fichier.make
+			fichier.connect_to("medias.txt")
+			analyser_fichier(fichier)			
+			fichier.disconnect
+			
+			-- Création et ouverture du fichier
+			create fichier2.make
+			fichier2.connect_to("medias2.txt")
+			analyser_fichier(fichier2)			
+			fichier2.disconnect
+		end
+		
+	analyser_fichier (fichier: TEXT_FILE_READ) is
+		local
+			ligne: STRING -- ligne du fichier média
 			i, index_start, index_end: INTEGER
 			titre: STRING 
 			livre: LIVRE
@@ -43,11 +60,7 @@ feature{ANY}
 			index_end := 1
 			titre := ""	
 			is_livre := False	
-			
-			-- Création et ouverture du fichier
-			create fichier.make
-			fichier.connect_to("medias.txt")
-			
+		
 			-- lecture du fichier
 			from 
 			until fichier.end_of_input 
@@ -185,7 +198,6 @@ feature{ANY}
 					end					
 				end							
 			end
-			fichier.disconnect
 		end
 	
 	-- parcours les listes des dvd et des livres pour récupérer les 
@@ -582,24 +594,31 @@ feature{ANY}
 				io.put_string("%N")
 				afficher_media_choisi
 				io.put_string("%N")
-				io.put_string("1. Consulter détail")
-				io.put_string("%N")
-				io.put_string("2. Retour")
-				io.put_string("%N")
-				io.flush
-				io.read_integer
-				reponse_int := io.last_integer
-				if reponse_int > 0 and reponse_int < 3 then
-					if reponse_int = 1 then
-						io.put_string("Sur quel média voulez vous plus de détails ? (saisissez son numéro) %N")
-						io.flush
-						io.read_integer
-						media := io.last_integer
-						afficher_detail_media(media)
-					end
-				else
-					io.put_string("Veuillez taper soit 1 soit 2")
+				correct := False
+				from
+				until correct
+				loop
+					io.put_string("1. Consulter détail")
 					io.put_string("%N")
+					io.put_string("2. Retour")
+					io.put_string("%N")
+					io.flush
+					io.read_integer
+					reponse_int := io.last_integer
+					if reponse_int > 0 and reponse_int < 3 then
+						correct := True
+						if reponse_int = 1 then
+							io.put_string("Sur quel média voulez vous plus de détails ? (saisissez son numéro) %N")
+							io.flush
+							io.read_integer
+							media := io.last_integer
+							media := media - 1
+							afficher_detail_media(media)
+						end
+					else
+						io.put_string("Veuillez taper soit 1 soit 2")
+						io.put_string("%N")
+					end
 				end
 			end
 		end
@@ -846,8 +865,12 @@ feature{ANY}
 			choix := ""
 			nb_exemplaires := 1
 			
-			
-			io.put_string("*** Ajouter un nouveau DVD ***")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*          AJOUTER DVD         *")
+			io.put_string("%N")
+			io.put_string("********************************")
 			io.put_string("%N")
 
 			io.put_string("Titre du DVD ? ")
@@ -953,7 +976,7 @@ feature{ANY}
 				    io.read_line
 				    nom.copy(io.last_string)
 				    acteur.set_nom(nom)
-				    io.put_string("Prenom ? ")
+				    io.put_string("Prénom ? ")
 				    io.flush
 				    io.read_line
 				    prenom.copy(io.last_string)
@@ -1057,7 +1080,7 @@ feature{ANY}
 			end
 			
 			create fichier.make
-			fichier.connect_for_appending_to("media2.txt")
+			fichier.connect_for_appending_to("medias2.txt")
 			fichier.put_line(ligne)
 			fichier.disconnect
 			 
@@ -1065,17 +1088,125 @@ feature{ANY}
 		
 	ajouter_livre is
 	    local
+	    	livre : LIVRE
+	    	auteur : AUTEUR
+	    	titre, nom, prenom : STRING
+	    	nb_exemplaires : INTEGER
+	    	indice : INTEGER
+	    	correct : BOOLEAN
+	    	choix, ligne : STRING
+			fichier : TEXT_FILE_WRITE
 	    do
+	    	nom := ""
+			prenom := ""
+			titre := ""
+			ligne := ""
+			choix := ""
+			nb_exemplaires := 1
+			
+			
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*         AJOUTER LIVRE        *")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("%N")
+
+			io.put_string("Titre du livre ? ")
+			io.flush
+			io.read_line
+			io.read_line
+			titre.copy(io.last_string)
+			indice := verifier_lst_media(titre)
+			
+			if indice = -1 then
+			    create livre.make			    
+			    livre.set_titre(titre)
+			    
+			    create auteur.make
+			    io.put_string("Nom de l'auteur ? ")
+			    io.flush
+				io.read_line
+				nom.copy(io.last_string)
+				auteur.set_nom(nom)
+				
+			    io.put_string("Prénom de l'auteur ? ")
+			    io.flush
+				io.read_line
+				prenom.copy(io.last_string)
+				
+				auteur.set_prenom(prenom)
+				livre.set_auteur(auteur)
+				remplir_lst_auteurs(livre)
+			    
+			    correct := False
+			    from
+			    until correct
+			    loop
+				    io.put_string("Nombre d'exemplaires ? ")
+				    io.flush
+				    io.read_integer
+				    nb_exemplaires := io.last_integer
+				    if nb_exemplaires >= 0 and nb_exemplaires <= 1000 then
+				        livre.set_nombre_exemplaires(nb_exemplaires)
+					    correct := True
+				    else
+						io.put_string("Veuillez taper un nombre")
+						io.put_string("%N")
+						correct := False
+				    end
+			    end
+			    
+			    lst_livres.add_last(livre)
+			  
+			else -- si livre existe déjà
+				io.put_string("Le média existe déjà.")
+				correct := False
+				livre := lst_livres.item(indice)
+				from
+				until correct
+				loop
+					io.put_string("Souhaitez vous ajouter un exemplaire ? (O/N) %N")
+					io.flush
+					io.read_line
+					choix.copy(io.last_string)
+					if choix.is_equal("N") then
+						correct := True
+					else
+						if choix.is_equal("O") then
+						    lst_livres.item(indice).set_nombre_exemplaires(lst_livres.item(indice).get_nombre_exemplaires+1)
+							correct := True
+						else
+							io.put_string("Veuillez taper O pour Oui ou N %
+                                  %pour Non")
+							io.put_string("%N")
+						end
+					end
+				end
+			end -- fin if livre existe
+			
+			ligne.append("Livre ; Titre<"+livre.get_titre+"> ; Auteur<"+livre.get_auteur.get_prenom+" "+livre.get_auteur.get_nom+"> ")
+			if livre.get_nombre_exemplaires > 1 then
+			    ligne.append("; Nombre<"+livre.get_nombre_exemplaires.to_string+">")
+			end
+			
+			create fichier.make
+			fichier.connect_for_appending_to("medias2.txt")
+			fichier.put_line(ligne)
+			fichier.disconnect
 	    end	
 	
 	afficher_media_choisi is
 		local
-			i: INTEGER
+			i, j: INTEGER
 		do
-			from i:= 1
+			from i:= 0
 			until i = lst_media_choisis.count
 			loop
-				io.put_string("%T "+i.to_string+" -")
+				j := i+1
+				io.put_string("%T "+j.to_string+" -")
 				io.put_string(lst_media_choisis.item(i).to_string)
 				io.put_string("%N")
 				i := i+1
@@ -1092,7 +1223,7 @@ feature{ANY}
 			until i = lst_media_choisis.count
 			loop
 				if i = choix_media then
-					if lst_media_choisis.item(i).to_string.has_substring("Livre") then
+					if lst_media_choisis.item(i).to_string.has_substring("LIVRE") then
 						from j:= 0
 						until j = lst_livres.count
 						loop
@@ -1125,7 +1256,7 @@ feature{ANY}
 			if livre /= Void then
 				io.put_string("Titre : "+livre.get_titre)
 				io.put_string("%N")
-				io.put_string("Auteur : "+livre.get_auteur.to_string)
+				io.put_string("Auteur : "+livre.get_auteur.get_prenom+" "+livre.get_auteur.get_nom)
 				io.put_string("%N")
 				io.put_string("Nombre d'exemplaire : ")
 				io.put_integer(livre.get_nombre_exemplaires)
@@ -1140,19 +1271,21 @@ feature{ANY}
 				io.put_integer(dvd.get_nombre_exemplaires)
 				io.put_string("%N")
 				io.put_string("*** Liste des acteur ***")
+				io.put_string("%N")
 				from i:= 0
 				until i = dvd.get_lst_acteurs.count
 				loop
-					io.put_string(dvd.get_lst_acteurs.item(i).to_string)
+					io.put_string("- "+dvd.get_lst_acteurs.item(i).get_prenom+" "+dvd.get_lst_acteurs.item(i).get_nom)
 					io.put_string("%N")
 					i := i+1
 				end
 				io.put_string("%N")
 				io.put_string("*** Liste des réalisateurs ***")
+				io.put_string("%N")
 				from i:= 0
 				until i = dvd.get_lst_realisateurs.count
 				loop
-					io.put_string(dvd.get_lst_realisateurs.item(i).to_string)
+					io.put_string("- "+dvd.get_lst_realisateurs.item(i).get_prenom+" "+dvd.get_lst_realisateurs.item(i).get_nom)
 					io.put_string("%N")
 					i := i+1
 				end
