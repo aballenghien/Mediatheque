@@ -21,7 +21,7 @@ feature{ANY}
 			-- remplissage des listes
 			initialisation
 			-- connexion de l'utilisateur, instanciation de la variable utilisateur_connecte
-			connexion
+			connexion			
 			from
 			until not continuer
 			loop
@@ -239,8 +239,7 @@ feature{ANY}
 					when 2 then
 						gestionnaire_media.rechercher_media
 					when 3 then
-						io.put_string("En cours de développement...")
-						io.put_string("%N")
+						gestionnaire_media.gerer_emprunt_reservation
 					when 4 then
 						io.put_string("Déconnexion")
 						io.put_string("%N")
@@ -258,8 +257,7 @@ feature{ANY}
 					when 2 then
 						gestionnaire_media.rechercher_media
 					when 3 then
-						io.put_string("En cours de développement...")
-						io.put_string("%N")
+						gestionnaire_media.gerer_emprunt_reservation
 					when 4 then
 						afficher_tableau("USER")
 						io.put_string("%N")
@@ -352,7 +350,7 @@ feature{ANY}
 			end	
 		end	
 	
-	-- Fonctino effectuant la connextion d'un utilisateur
+	-- Fonctino effectuant la connexion d'un utilisateur
 	connexion is
 		local 
 			identifiant : STRING
@@ -382,6 +380,7 @@ feature{ANY}
 				-- on vérifie que l'utilisateur existe
 				utilisateur_connecte := gestionnaire_utilisateur.rechercher_utilisateur(identifiant)
 				if utilisateur_connecte /=Void then
+					gestionnaire_media.set_utilisateur(utilisateur_connecte)
 					connexion_ok := True
 				else
 					io.put_string("L'identifiant saisi n'est pas reconnu")

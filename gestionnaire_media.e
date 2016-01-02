@@ -11,6 +11,7 @@ feature{}
   	lst_livres: ARRAY[LIVRE] -- liste des livres
   	lst_dvd : ARRAY[DVD] -- liste des dvd
   	lst_media_choisis : ARRAY[MEDIA] -- liste des médias à afficher
+  	utilisateur : UTILISATEUR
 
 feature{ANY}
 	make is
@@ -38,8 +39,10 @@ feature{ANY}
 			-- Création et ouverture du fichier
 			create fichier2.make
 			fichier2.connect_to("medias2.txt")
-			analyser_fichier(fichier2)			
-			fichier2.disconnect
+			if fichier2.is_connected then
+				analyser_fichier(fichier2)			
+				fichier2.disconnect
+			end
 		end
 		
 	analyser_fichier (fichier: TEXT_FILE_READ) is
@@ -600,12 +603,14 @@ feature{ANY}
 				loop
 					io.put_string("1. Consulter détail")
 					io.put_string("%N")
-					io.put_string("2. Retour")
+					io.put_string("2. Emprunter")
+					io.put_string("%N")
+					io.put_string("3. Retour")
 					io.put_string("%N")
 					io.flush
 					io.read_integer
 					reponse_int := io.last_integer
-					if reponse_int > 0 and reponse_int < 3 then
+					if reponse_int > 0 and reponse_int < 4 then
 						correct := True
 						if reponse_int = 1 then
 							io.put_string("Sur quel média voulez vous plus de détails ? (saisissez son numéro) %N")
@@ -615,8 +620,16 @@ feature{ANY}
 							media := media - 1
 							afficher_detail_media(media)
 						end
+						if reponse_int = 2 then 
+							io.put_string("Quel media souhaitez vous emprunter? (saississez un numéro) %N")
+							io.flush
+							io.read_integer
+							media := io.last_integer
+							media := media - 1
+							emprunter_un_media(media)
+						end
 					else
-						io.put_string("Veuillez taper soit 1 soit 2")
+						io.put_string("Veuillez taper soit 1, 2 ou 3")
 						io.put_string("%N")
 					end
 				end
@@ -1270,7 +1283,7 @@ feature{ANY}
 				io.put_string("Nombre d'exemplaire : ")
 				io.put_integer(dvd.get_nombre_exemplaires)
 				io.put_string("%N")
-				io.put_string("*** Liste des acteur ***")
+				io.put_string("*** Liste des acteurs ***")
 				io.put_string("%N")
 				from i:= 0
 				until i = dvd.get_lst_acteurs.count
@@ -1291,6 +1304,337 @@ feature{ANY}
 				end
 			end
 					
+		end
+		
+	emprunter_un_media(choix_media : INTEGER) is
+		local
+			livre : LIVRE
+			dvd : DVD
+			i,j : INTEGER
+			is_livre : BOOLEAN
+			un_emprunt : EMPRUNT
+			une_resa : RESERVATION
+			ajouter : BOOLEAN
+			ajouter_ds_media : STRING
+			correct : BOOLEAN
+			reserver : BOOLEAN
+			choix : STRING
+			fichier_emprunt : TEXT_FILE_WRITE
+			fichier_reservation : TEXT_FILE_WRITE
+		do
+			is_livre := False
+			ajouter := False
+			
+			from i:= 0
+			until i = lst_media_choisis.count
+			loop
+				if i = choix_media then
+					if lst_media_choisis.item(i).to_string.has_substring("LIVRE") then
+						from j:= 0
+						until j = lst_livres.count
+						loop
+							if lst_livres.item(j).get_titre = lst_media_choisis.item(i).get_titre then
+								livre := lst_livres.item(j)
+								is_livre := True
+							end
+							j := j+1
+						end
+					else 
+						from j:= 0
+						until j = lst_dvd.count
+						loop
+							if lst_dvd.item(j).get_titre = lst_media_choisis.item(i).get_titre then
+								dvd := lst_dvd.item(j)
+							end
+							j := j+1
+						end
+					end
+				end
+				i := i+1
+			end
+			reserver := False
+			if is_livre then
+				create un_emprunt.make
+				un_emprunt.set_user(utilisateur)
+				un_emprunt.set_livre(livre)
+				ajouter_ds_media := livre.ajouter_emprunt(un_emprunt)
+				if ajouter_ds_media = "NON" then
+					correct := False
+					from
+					until correct
+					loop
+						io.put_string("Ce livre est déjà emprunté, souhaitez vous le réserver ? (O/N) %N")
+						io.flush
+						io.read_line
+						io.read_line
+						choix := io.last_string
+						if choix.is_equal("O") or choix.is_equal("N") then
+							correct := True
+							if choix.is_equal("O") then
+								reserver := True
+							end
+						end
+					end	
+				end	
+				if ajouter_ds_media.is_equal("FAIT") then
+					io.put_string("Vous empruntez déjà ce livre! %N")
+					reserver := False
+				end			
+				if ajouter_ds_media.is_equal("OUI") then
+					ajouter := utilisateur.ajouter_emprunt(un_emprunt)
+					if not ajouter then
+						correct := False
+						from
+						until correct
+						loop
+							io.put_string("Vous avez déjà emprunté trois médias, souhaitez vous réserver ce livre? (O/N) %N")
+							io.flush
+							io.read_line
+							io.read_line
+							choix := io.last_string
+							if choix.is_equal("O") or choix.is_equal("N") then
+								correct := True
+								if choix.is_equal("O") then
+									reserver := True
+								end
+							end
+						end
+					end	
+				end
+				if ajouter then
+					create fichier_emprunt.make
+					fichier_emprunt.connect_for_appending_to("emprunts.txt")
+					fichier_emprunt.put_line(un_emprunt.format_enregistrement)
+					fichier_emprunt.disconnect
+					io.put_string("Nouvel emprunt enregistré !%N")
+				end
+				if not ajouter and reserver then
+					create une_resa.make
+					une_resa.set_user(utilisateur)
+					une_resa.set_livre(livre)
+					ajouter := livre.ajouter_reservation(une_resa)
+					if not ajouter then
+						io.put_string("La réservation n'a pas pu être effectuée %N")
+					end
+					if ajouter then
+						ajouter := utilisateur.ajouter_reservation(une_resa)
+						if not ajouter then
+							io.put_string("Vous ne pouvez pas réserver plus de trois médias simultanément %N")
+						end
+					end					
+					if ajouter then
+						create fichier_reservation.make
+						fichier_reservation.connect_for_appending_to("reservations.txt")
+						fichier_reservation.put_line(une_reservation.format_enregistrement)
+						fichier_reservation.disconnect
+						io.put_string("Réservation effectuée ! %N")
+					end
+				end
+			else
+				create un_emprunt.make
+				un_emprunt.set_user(utilisateur)
+				un_emprunt.set_dvd(dvd)
+				ajouter_ds_media := dvd.ajouter_emprunt(un_emprunt)
+				if ajouter_ds_media.is_equal("NON") then
+					correct := False
+					from
+					until correct
+					loop
+						io.put_string("Ce DVD est déjà emprunté, souhaitez vous le réserver ? (O/N) %N")
+						io.flush
+						io.read_line
+						io.read_line
+						choix := io.last_string
+						if choix.is_equal("O") or choix.is_equal("N") then
+							correct := True
+							if choix.is_equal("O") then
+								reserver := True
+							end
+						end
+					end	
+				end	
+				if ajouter_ds_media.is_equal("FAIT") then
+					io.put_string("Vous empruntez déjà ce DVD! %N")
+					reserver := False
+				end
+				if ajouter_ds_media.is_equal("OUI") then
+					ajouter := utilisateur.ajouter_emprunt(un_emprunt)
+					if not ajouter then
+						correct := False
+						from
+						until correct
+						loop
+							io.put_string("Vous avez déjà emprunté trois médias, souhaitez vous réserver ce DVD? (O/N) %N")
+							io.flush
+							io.read_line
+							io.read_line
+							choix := io.last_string
+							if choix.is_equal("O") or choix.is_equal("N") then
+								correct := True
+								if choix.is_equal("O") then
+									reserver := True
+								end
+							end
+						end
+					end	
+				end
+				
+				if ajouter then
+					create fichier_emprunt.make
+					fichier_emprunt.connect_for_appending_to("emprunts.txt")
+					fichier_emprunt.put_line(un_emprunt.format_enregistrement)
+					fichier_emprunt.disconnect
+					io.put_string("Nouvel emprunt enregistré ! %N")
+				end
+				if not ajouter and reserver then
+					create une_resa.make
+					une_resa.set_user(utilisateur)
+					une_resa.set_dvd(dvd)
+					ajouter := dvd.ajouter_reservation(une_resa)
+					if not ajouter then
+						io.put_string("La réservation n'a pas pu être effectuée. %N")
+					end
+					if ajouter then
+						ajouter := utilisateur.ajouter_reservation(une_resa)
+						if not ajouter then
+							io.put_string("Vous ne pouvez pas réserver plus de trois médias simultanément. %N")
+						end
+					end
+					if ajouter then
+						create fichier_reservation.make
+						fichier_reservation.connect_for_appending_to("reservations.txt")
+						fichier_reservation.put_line(une_reservation.format_enregistrement)
+						fichier_reservation.disconnect
+						io.put_string("Réservation effectuée ! %N")
+					end
+				end
+			end
+		end
+		
+	gerer_emprunt_reservation is
+		local
+			continuer : BOOLEAN
+			choix : INTEGER
+		do
+			continuer := True
+			from
+			until not continuer
+			loop
+				io.put_string("Que souhaiter vous faire? %N")
+				io.put_string("%T 1. Consulter mes réservations %N")
+				io.put_string("%T 2. Consulter mes emprunts %N")
+				io.put_string("%T 3. Annuler une réservation %N")
+				io.flush
+				io.read_line
+				choix := io.last_integer
+				if choix > 0 and choix < 5 then
+					inspect choix
+					when 1 then 
+						afficher_reservations
+					when 2 then
+						afficher_emprunts
+					when 3 then
+						annuler_reservation
+					when 4 then
+						continuer := False
+					end
+				else
+					io.put_string("Saississez un nombre compris entre 1 et 4 %N")
+				end
+			end
+		end
+		
+	afficher_reservations is
+		local 
+			i : INTEGER
+		do
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*      MES RESERVATIONS        *")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			from i := 0
+			until i = utilisateur.get_lst_reservations.count
+			loop
+				if utilisateur.get_lst_reservations.item(i).get_livre /= Void then
+					io.put_string(utilisateur.get_lst_reservations.item(i).get_livre.to_string)
+				else
+					io.put_string(utilisateur.get_lst_reservations.item(i).get_dvd.to_string)
+				end
+				i := i+1
+			end
+		end
+		
+	afficher_emprunts is
+		local 
+			i : INTEGER
+		do
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*      MES EMPRUNTS            *")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			from i := 0
+			until i = utilisateur.get_lst_emprunts.count
+			loop
+				if utilisateur.get_lst_emprunts.item(i).get_livre /= Void then
+					io.put_string(utilisateur.get_lst_emprunts.item(i).get_livre.to_string)
+				else
+					io.put_string(utilisateur.get_lst_emprunts.item(i).get_dvd.to_string)
+				end
+				i := i+1
+			end
+		end
+		
+	annuler_reservation is 
+		local 
+			i : INTEGER
+			choix : INTEGER
+			correct : BOOLEAN
+		do
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*      MES RESERVATIONS        *")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			from i := 0
+			until i = utilisateur.get_lst_reservations.count
+			loop
+				if utilisateur.get_lst_reservations.item(i).get_livre /= Void then
+					io.put_string((i+1).to_string + ". " + utilisateur.get_lst_reservations.item(i).get_livre.get_titre+"%N")
+				else
+					io.put_string((i+1).to_string + ". " + utilisateur.get_lst_reservations.item(i).get_dvd.get_titre+"%N")
+				end
+				i := i+1
+			end
+			correct := False
+			from
+			until correct 
+			loop
+				io.put_string("Quelle réservation souhaitez vous annuler ? (Saississez un numéro)%N")
+				io.flush
+				io.read_line
+				choix := io.last_integer
+				if choix > 0 and choix <= i then
+					correct := True
+					utilisateur.get_lst_reservations.remove(choix-1)
+					io.put_string("Réservation annulée")
+				end
+			end
+		end 
+		
+			
+				
+		
+	set_utilisateur(u : UTILISATEUR) is
+		do
+			utilisateur := u
 		end
 	
 	get_lst_acteurs : ARRAY[ACTEUR] is
