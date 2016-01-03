@@ -6,17 +6,32 @@ creation{ANY}
 feature{}
   	utilisateur_connecte : UTILISATEUR
   	lst_users : ARRAY[UTILISATEUR]
+  	lst_medias: ARRAY[MEDIA] -- liste des medias
+ 	lst_acteurs: ARRAY[ACTEUR] --liste des acteurs
+ 	lst_realisateurs: ARRAY[REALISATEUR] --liste des réalisateurs
+  	lst_auteurs: ARRAY[AUTEUR] -- liste des auteurs
+  	lst_livres: ARRAY[LIVRE] -- liste des livres
+  	lst_dvd : ARRAY[DVD] -- liste des dvd
+  	lst_media_choisis : ARRAY[MEDIA] -- liste des médias à afficher
   	gestionnaire_utilisateur : GESTIONNAIRE_UTILISATEUR
   	gestionnaire_media : GESTIONNAIRE_MEDIA
+  	gestionnaire_emprunt_reservation : GESTIONNAIRE_EMPRUNT_RESERVATION
 
 feature{ANY}
 	make is
 		local
 			continuer : BOOLEAN
 		do
-			create lst_users.with_capacity(1,0)
+			create lst_users.with_capacity(1,0)			
+			create lst_auteurs.with_capacity(1,0)
+			create lst_acteurs.with_capacity(1,0)
+			create lst_realisateurs.with_capacity(1,0)
+			create lst_livres.with_capacity(1,0)
+			create lst_dvd.with_capacity(1,0)
+			create lst_media_choisis.with_capacity(1,0)
 			create gestionnaire_utilisateur.make(Current)
 			create gestionnaire_media.make(Current)
+			create gestionnaire_emprunt_reservation.make(Current)
 			-- on affiche le menu tant que l'utilisateur n'a pas décidé 
 			-- de quitter
 			continuer := True
@@ -45,6 +60,46 @@ feature{ANY}
 	get_utilisateur_connecte : UTILISATEUR is
 		do
 			Result := utilisateur_connecte
+		end
+		
+	get_lst_acteurs : ARRAY[ACTEUR] is
+		do
+			Result := lst_acteurs
+		end
+	
+	get_lst_realisateurs : ARRAY[REALISATEUR] is
+		do
+			Result := lst_realisateurs
+		end
+	
+	get_lst_auteurs : ARRAY[AUTEUR] is
+		do
+			Result := lst_auteurs
+		end
+	
+	get_lst_livres : ARRAY[LIVRE] is
+		do
+			Result := lst_livres
+		end
+	
+	get_lst_dvd : ARRAY[DVD] is
+		do
+			Result := lst_dvd
+		end
+	
+	get_lst_media_choisis : ARRAY[MEDIA] is
+		do
+			Result := lst_media_choisis
+		end
+		
+	get_gestionnaire_emprunt_reservation : GESTIONNAIRE_EMPRUNT_RESERVATION is
+		do
+			Result := gestionnaire_emprunt_reservation
+		end
+		
+	set_lst_media_choisis (lst : ARRAY[MEDIA]) is
+		do 
+			lst_media_choisis := lst
 		end
 
 	-- fonction qui permet d'initialiser et remplir les listes
@@ -87,15 +142,15 @@ feature{ANY}
 				io.put_string("********************************")
 				io.put_string("%N")
 				from i:= 0
-				until i = gestionnaire_media.get_lst_livres.count
+				until i = lst_livres.count
 				loop
-					io.put_string(gestionnaire_media.get_lst_livres.item(i).to_string)
+					io.put_string(lst_livres.item(i).to_string)
 					io.put_string("%N")
 					i := i+1
 				end
 			end
 			
-			-- Afficheage du tableau des DVD
+			-- Affichage du tableau des DVD
 			if lst.is_equal("DVD") then
 				io.put_string("********************************")
 				io.put_string("%N")
@@ -104,9 +159,9 @@ feature{ANY}
 				io.put_string("********************************")
 				io.put_string("%N")
 				from i:= 0
-				until i = gestionnaire_media.get_lst_dvd.count
+				until i = lst_dvd.count
 				loop
-					io.put_string(gestionnaire_media.get_lst_dvd.item(i).to_string)
+					io.put_string(lst_dvd.item(i).to_string)
 					io.put_string("%N")
 					i := i+1
 				end
@@ -121,9 +176,9 @@ feature{ANY}
 				io.put_string("********************************")
 				io.put_string("%N")
 				from i:= 0
-				until i = gestionnaire_media.get_lst_acteurs.count
+				until i = lst_acteurs.count
 				loop
-					io.put_string(gestionnaire_media.get_lst_acteurs.item(i).to_string)
+					io.put_string(lst_acteurs.item(i).to_string)
 					io.put_string("%N")
 					i := i+1
 				end
@@ -138,9 +193,9 @@ feature{ANY}
 				io.put_string("********************************")
 				io.put_string("%N")
 				from i:= 0
-				until i = gestionnaire_media.get_lst_auteurs.count
+				until i = lst_auteurs.count
 				loop
-					io.put_string(gestionnaire_media.get_lst_auteurs.item(i).to_string)
+					io.put_string(lst_auteurs.item(i).to_string)
 					io.put_string("%N")
 					i := i+1
 				end
@@ -155,9 +210,9 @@ feature{ANY}
 				io.put_string("********************************")
 				io.put_string("%N")
 				from i:= 0
-				until i = gestionnaire_media.get_lst_realisateurs.count
+				until i = lst_realisateurs.count
 				loop
-					io.put_string(gestionnaire_media.get_lst_realisateurs.item(i).to_string)
+					io.put_string(lst_realisateurs.item(i).to_string)
 					io.put_string("%N")
 					i := i+1
 				end
@@ -172,16 +227,16 @@ feature{ANY}
 				io.put_string("********************************")
 				io.put_string("%N")
 				from i:= 0
-				until i = gestionnaire_media.get_lst_dvd.count
+				until i = lst_dvd.count
 				loop
-					io.put_string(gestionnaire_media.get_lst_dvd.item(i).to_string)
+					io.put_string(lst_dvd.item(i).to_string)
 					io.put_string("%N")
 					i := i+1
 				end
 				from i:= 0
-				until i = gestionnaire_media.get_lst_livres.count
+				until i = lst_livres.count
 				loop
-					io.put_string(gestionnaire_media.get_lst_livres.item(i).to_string)
+					io.put_string(lst_livres.item(i).to_string)
 					io.put_string("%N")
 					i := i+1
 				end
@@ -190,9 +245,9 @@ feature{ANY}
 			-- Affichage du tableau des médias choisis
 			if lst.is_equal("MEDIACHOISIS") then
 				from i:= 0
-				until i = gestionnaire_media.get_lst_media_choisis.count
+				until i = lst_media_choisis.count
 				loop
-					io.put_string(gestionnaire_media.get_lst_media_choisis.item(i).to_string)
+					io.put_string(lst_media_choisis.item(i).to_string)
 					io.put_string("%N")
 					i := i+1
 				end
@@ -231,7 +286,9 @@ feature{ANY}
 				io.put_string("%N")
 				io.put_string("7. Ajouter un média")
 				io.put_string("%N")
-				io.put_string("8. Déconnexion")
+				io.put_string("8. Gérer les réservations et emprunts des utilisateurs")
+				io.put_string("%N")
+				io.put_string("9. Déconnexion")
 				io.put_string("%N")
 			else
 				io.put_string("4. Déconnexion")
@@ -251,7 +308,7 @@ feature{ANY}
 					when 2 then
 						gestionnaire_media.rechercher_media
 					when 3 then
-						gestionnaire_media.gerer_emprunt_reservation
+						gestionnaire_emprunt_reservation.gerer_emprunt_reservation
 					when 4 then
 						io.put_string("Déconnexion")
 						io.put_string("%N")
@@ -269,7 +326,7 @@ feature{ANY}
 					when 2 then
 						gestionnaire_media.rechercher_media
 					when 3 then
-						gestionnaire_media.gerer_emprunt_reservation
+						gestionnaire_emprunt_reservation.gerer_emprunt_reservation
 					when 4 then
 						afficher_tableau("USER")
 						io.put_string("%N")
@@ -282,6 +339,8 @@ feature{ANY}
 					when 7 then
 						gestionnaire_media.ajouter_media
 					when 8 then
+						gestionnaire_emprunt_reservation.gerer_emprunts_reservations_admin
+					when 9 then
 						io.put_string("Déconnexion")
 						io.put_string("%N")
 						continuer := False
@@ -392,8 +451,8 @@ feature{ANY}
 				-- on vérifie que l'utilisateur existe
 				utilisateur_connecte := gestionnaire_utilisateur.rechercher_utilisateur(identifiant)
 				if utilisateur_connecte /=Void then				
-					gestionnaire_media.remplir_lst_reservations
-					gestionnaire_media.remplir_lst_emprunts
+					gestionnaire_emprunt_reservation.remplir_lst_reservations
+					gestionnaire_emprunt_reservation.remplir_lst_emprunts
 					connexion_ok := True
 				else
 					io.put_string("L'identifiant saisi n'est pas reconnu")
@@ -411,4 +470,9 @@ feature{ANY}
 				io.put_string("%N")
 			end
 		end
+		
+	initialiser_liste_medias_choisis is
+		do
+			create lst_media_choisis.with_capacity(1,0)
+		end	
 end

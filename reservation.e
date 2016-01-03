@@ -4,6 +4,7 @@ creation{ANY}
 	make
 
 feature{}
+	numero : INTEGER
 	user: UTILISATEUR
 	livre: LIVRE
 	dvd : DVD
@@ -18,9 +19,9 @@ feature{ANY}
 	afficher_contenu_reservation : STRING is
 		do
 			if livre/= Void then
-				Result := livre.to_string
+				Result := "%T LIVRE :"+ livre.get_titre
 			else 
-				Result := dvd.to_string
+				Result := "%T DVD :" + dvd.get_titre
 			end
 		end
 	
@@ -29,7 +30,8 @@ feature{ANY}
 			rst : STRING
 		do
 			rst := ""
-			rst.copy("Utilisateur<"+user.get_identifiant+"> ; ")
+			rst.copy("Numero<"+numero.to_string+"> ; ")
+			rst.append("Utilisateur<"+user.get_identifiant+"> ; ")
 			if livre /= Void then
 				rst.append("LIVRE<"+livre.get_titre+"> ; ")
 			else
@@ -68,6 +70,11 @@ feature{ANY}
 		do
 			Result := priorite
 		end
+	
+	get_numero : INTEGER is
+		do
+			Result := numero
+		end
 		
 	set_user (u: UTILISATEUR) is
 		do
@@ -87,6 +94,11 @@ feature{ANY}
 	set_priorite (p: INTEGER) is
 		do 
 			priorite := p
+		end
+		
+	set_numero (n: INTEGER) is
+		do
+			numero := n
 		end
 	
 
