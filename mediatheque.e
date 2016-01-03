@@ -5,6 +5,7 @@ creation{ANY}
 
 feature{}
   	utilisateur_connecte : UTILISATEUR
+  	lst_users : ARRAY[UTILISATEUR]
   	gestionnaire_utilisateur : GESTIONNAIRE_UTILISATEUR
   	gestionnaire_media : GESTIONNAIRE_MEDIA
 
@@ -13,8 +14,9 @@ feature{ANY}
 		local
 			continuer : BOOLEAN
 		do
-			create gestionnaire_utilisateur.make
-			create gestionnaire_media.make
+			create lst_users.with_capacity(1,0)
+			create gestionnaire_utilisateur.make(Current)
+			create gestionnaire_media.make(Current)
 			-- on affiche le menu tant que l'utilisateur n'a pas décidé 
 			-- de quitter
 			continuer := True
@@ -33,6 +35,16 @@ feature{ANY}
 					continuer := False
 				end
 			end
+		end
+		
+	get_lst_users : ARRAY[UTILISATEUR] is
+		do
+			Result := lst_users
+		end
+		
+	get_utilisateur_connecte : UTILISATEUR is
+		do
+			Result := utilisateur_connecte
 		end
 
 	-- fonction qui permet d'initialiser et remplir les listes
@@ -58,9 +70,9 @@ feature{ANY}
 				io.put_string("********************************")
 				io.put_string("%N")
 				from i:= 0
-				until i = gestionnaire_utilisateur.get_lst_users.count
+				until i = lst_users.count
 				loop
-					io.put_string(gestionnaire_utilisateur.get_lst_users.item(i).to_string)
+					io.put_string(lst_users.item(i).to_string)
 					io.put_string("%N")
 					i := i+1
 				end
@@ -379,8 +391,9 @@ feature{ANY}
 				identifiant.copy(io.last_string)
 				-- on vérifie que l'utilisateur existe
 				utilisateur_connecte := gestionnaire_utilisateur.rechercher_utilisateur(identifiant)
-				if utilisateur_connecte /=Void then
-					gestionnaire_media.set_utilisateur(utilisateur_connecte)
+				if utilisateur_connecte /=Void then				
+					gestionnaire_media.remplir_lst_reservations
+					gestionnaire_media.remplir_lst_emprunts
 					connexion_ok := True
 				else
 					io.put_string("L'identifiant saisi n'est pas reconnu")

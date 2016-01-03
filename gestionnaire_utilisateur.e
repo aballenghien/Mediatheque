@@ -4,13 +4,13 @@ creation{ANY}
 	make
 
 feature{}
-	lst_users: ARRAY[UTILISATEUR] -- liste des utilisateurs
+	mediatheque : MEDIATHEQUE
 
 feature{ANY}
-	make is
+	make (m : MEDIATHEQUE) is
 	
 		do
-			create lst_users.with_capacity(1, 0)
+			mediatheque := m
 		end
 		
 	--récupère tous les utilisateurs dans le fichier
@@ -129,7 +129,7 @@ feature{ANY}
 					end
 					
 					-- Ajout de l'utilisateur dans le tableau
-					lst_users.add_last(user)
+					mediatheque.get_lst_users.add_last(user)
 				end		
 			end
 		end
@@ -174,9 +174,9 @@ feature{ANY}
 				end
 				identifiant.copy(io.last_string)
 				from i:= 0
-				until i = lst_users.count
+				until i = mediatheque.get_lst_users.count
 				loop
-					if lst_users.item(i).get_identifiant.is_equal(identifiant) then
+					if mediatheque.get_lst_users.item(i).get_identifiant.is_equal(identifiant) then
 						id_ok := False
 					end
 					i := i+1
@@ -256,7 +256,7 @@ feature{ANY}
 				if admin.is_equal("O") then
 					utilisateur.set_admin(True)
 				end
-				lst_users.add_last(utilisateur)
+				mediatheque.get_lst_users.add_last(utilisateur)
 			
 				io.put_string("Nouvel utilisateur ajouté ! ")
 				io.put_string("%N")
@@ -272,19 +272,14 @@ feature{ANY}
 			Result := Void
 			-- on parcourt la liste des utilisateurs
 			from i := 0
-			until i = lst_users.count
+			until i = mediatheque.get_lst_users.count
 			loop
 				-- test sur l'identifiant
-				if lst_users.item(i).get_identifiant.is_equal(identifiant) then
+				if mediatheque.get_lst_users.item(i).get_identifiant.is_equal(identifiant) then
 					-- si on le trouve, on renvoie l'utilisateur
-					Result := lst_users.item(i)
+					Result := mediatheque.get_lst_users.item(i)
 				end
 				i := i + 1
 			end
 		end
-		
-		get_lst_users : ARRAY[UTILISATEUR] is
-			do
-				Result := lst_users
-			end
 end

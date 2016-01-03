@@ -31,11 +31,11 @@ feature{ANY}
 			rst := ""
 			rst.copy("Utilisateur<"+user.get_identifiant+"> ; ")
 			if livre /= Void then
-				rst.copy("LIVRE<"+livre.get_titre+"> ; ")
+				rst.append("LIVRE<"+livre.get_titre+"> ; ")
 			else
-				rst.copy("DVD<"+dvd.get_titre+"> ; ")
+				rst.append("DVD<"+dvd.get_titre+"> ; ")
 			end
-			rst.copy("Priorite<"+priorite+">")
+			rst.append("Priorite<"+priorite.to_string+">")
 			Result := rst
 		end
 		
