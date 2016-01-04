@@ -565,6 +565,13 @@ feature{ANY}
 			from
 			until not continuer
 			loop
+				io.put_string("%N")
+				io.put_string("********************************")
+				io.put_string("%N")
+				io.put_string("* MENU EMPRUNTS & RESERVATIONS *")
+				io.put_string("%N")
+				io.put_string("********************************")
+				io.put_string("%N")
 				io.put_string("Que souhaiter vous faire? %N")
 				io.put_string("1. Consulter mes réservations %N")
 				io.put_string("2. Consulter mes emprunts %N")
@@ -627,7 +634,7 @@ feature{ANY}
 			io.put_string("%N")
 			io.put_string("********************************")
 			io.put_string("%N")
-			io.put_string("*      MES EMPRUNTS            *")
+			io.put_string("*          MES EMPRUNTS        *")
 			io.put_string("%N")
 			io.put_string("********************************")
 			io.put_string("%N")
@@ -657,7 +664,7 @@ feature{ANY}
 			io.put_string("%N")
 			io.put_string("********************************")
 			io.put_string("%N")
-			io.put_string("*      MES RESERVATIONS        *")
+			io.put_string("*        MES RESERVATIONS      *")
 			io.put_string("%N")
 			io.put_string("********************************")
 			io.put_string("%N")
@@ -678,7 +685,7 @@ feature{ANY}
 				from
 				until correct 
 				loop
-					io.put_string("Quelle réservation souhaitez vous annuler ? (Saississez un numéro)%N")
+					io.put_string("Quelle réservation souhaitez vous annuler ? (Saississez son numéro)%N")
 					io.flush
 					io.read_integer
 					choix := io.last_integer
@@ -709,17 +716,16 @@ feature{ANY}
 				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
-				io.put_string("*      RETOUR                  *")
+				io.put_string("*      RETOURNER UN EMPRUNT    *")
 				io.put_string("%N")
 				io.put_string("********************************")
-				io.put_string("%N")
 				io.put_string("%N")
 				correct := False
 				compteur := 1
 				from
 				until correct or compteur = 4
 				loop
-					io.put_string("Tapez l'identifiant d'un utilisateur : %N")
+					io.put_string("Identifiant de l'utilisateur : %N")
 					io.flush
 					if compteur = 1 then
 						io.read_line
@@ -736,23 +742,23 @@ feature{ANY}
 						i := i+1
 					end
 					if not correct then 
-						io.put_string("identifiant inconnu %N")
+						io.put_string("Identifiant inconnu. %N")
 					end
 					compteur := compteur + 1 
 				end
 				if compteur = 4 then 
-					io.put_string("abandon du retour de l'ouvrage")
+					io.put_string("Abandon du retour de l'ouvrage.")
 				end
 				if correct then
-					io.put_string("********Emprunts de l'utilisateur********* %N %N")
+					io.put_string("***** Emprunts de l'utilisateur *****%N")
 					if  utilisateur.get_lst_emprunts.count > 0 then
 						from i := 0
 						until i = utilisateur.get_lst_emprunts.count
 						loop
 							if utilisateur.get_lst_emprunts.item(i).get_dvd /= Void then
-								io.put_string((i+1).to_string+" ."+utilisateur.get_lst_emprunts.item(i).get_dvd.get_titre+"%N")
+								io.put_string((i+1).to_string+". "+utilisateur.get_lst_emprunts.item(i).get_dvd.get_titre+"%N")
 							else
-								io.put_string((i+1).to_string+" ."+utilisateur.get_lst_emprunts.item(i).get_livre.get_titre+"%N")
+								io.put_string((i+1).to_string+". "+utilisateur.get_lst_emprunts.item(i).get_livre.get_titre+"%N")
 							end
 							i:= i+1
 						end
@@ -761,7 +767,7 @@ feature{ANY}
 						from
 						until correct
 						loop
-							io.put_string("Quel emprunt se termine ? (Saisissez un numéro)")
+							io.put_string("Quel emprunt se termine ? (Saisissez son numéro)%N")
 							io.flush
 							io.read_integer
 							choix := io.last_integer
@@ -777,7 +783,7 @@ feature{ANY}
 							end
 						end
 					else
-						io.put_string("Aucun emprunt en cours!%N")
+						io.put_string("Aucun emprunt en cours ! %N")
 					end
 				end
 			end
@@ -795,17 +801,16 @@ feature{ANY}
 				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
-				io.put_string("*      ANNULATION RESERVATION  *")
+				io.put_string("*    ANNULATION RESERVATION    *")
 				io.put_string("%N")
 				io.put_string("********************************")
-				io.put_string("%N")
 				io.put_string("%N")
 				correct := False
 				compteur := 1
 				from
 				until correct or compteur = 4
 				loop
-					io.put_string("Tapez l'identifiant d'un utilisateur : %N")
+					io.put_string("Identifiant de l'utilisateur : %N")
 					io.flush
 					if compteur =1 then
 						io.read_line
@@ -822,7 +827,7 @@ feature{ANY}
 						i := i+1
 					end
 					if not correct then 
-						io.put_string("identifiant inconnu %N")
+						io.put_string("Identifiant inconnu. %N")
 					end
 					compteur := compteur + 1 
 				end
@@ -830,15 +835,15 @@ feature{ANY}
 					io.put_string("Réservation toujours active !")
 				end
 				if correct then
-					io.put_string("********Reservations de l'utilisateur********* %N %N")
+					io.put_string("***** Réservations de l'utilisateur ***** %N")
 					if utilisateur.get_lst_reservations.count > 0 then
 						from i := 0
 						until i = utilisateur.get_lst_reservations.count
 						loop
 							if utilisateur.get_lst_reservations.item(i).get_dvd /= Void then
-								io.put_string((i+1).to_string+" ."+utilisateur.get_lst_reservations.item(i).get_dvd.get_titre+"%N")
+								io.put_string((i+1).to_string+". "+utilisateur.get_lst_reservations.item(i).get_dvd.get_titre+"%N")
 							else
-								io.put_string((i+1).to_string+" ."+utilisateur.get_lst_reservations.item(i).get_livre.get_titre+"%N")
+								io.put_string((i+1).to_string+". "+utilisateur.get_lst_reservations.item(i).get_livre.get_titre+"%N")
 							end
 							i:= i+1
 						end
@@ -847,7 +852,7 @@ feature{ANY}
 						from
 						until correct
 						loop
-							io.put_string("Quel reservation doit être annulée ? (Saisissez un numéro)")
+							io.put_string("Quel réservation doit être annulée ? (Saisissez son numéro)%N")
 							io.flush
 							io.read_integer
 							choix := io.last_integer
@@ -859,11 +864,12 @@ feature{ANY}
 								-- suppression de la réservation pour le média concerné
 								supprimer_reservation_liste_medias(utilisateur.get_lst_reservations.item(choix-1))
 								correct := True
-								io.put_string("Reservation annulée ! %N")
+								io.flush
+								io.put_string("Réservation annulée ! %N")
 							end
 						end
 					else
-						io.put_string("Aucune réservation en cours! %N")
+						io.put_string("Aucune réservation en cours ! %N")
 					end
 				end
 			end	
@@ -920,49 +926,49 @@ feature{ANY}
 			identifiant : STRING
 		do
 			io.put_string("%N")
-				io.put_string("********************************")
-				io.put_string("%N")
-				io.put_string("*      EMPRUNT                 *")
-				io.put_string("%N")
-				io.put_string("********************************")
-				io.put_string("%N")
-				io.put_string("%N")
-				correct := False
-				compteur := 1
-				from
-				until correct or compteur = 4
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*     RESERVATION -> EMPRUNT   *")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			correct := False
+			compteur := 1
+			from
+			until correct or compteur = 4
+			loop
+				io.put_string("Identifiant de l'utilisateur : %N")
+				io.flush
+				io.read_line
+				io.read_line
+				identifiant := io.last_string
+				from i := 0
+				until i = mediatheque.get_lst_users.count
 				loop
-					io.put_string("Tapez l'identifiant d'un utilisateur : %N")
-					io.flush
-					io.read_line
-					io.read_line
-					identifiant := io.last_string
-					from i := 0
-					until i = mediatheque.get_lst_users.count
-					loop
-						if mediatheque.get_lst_users.item(i).get_identifiant.is_equal(identifiant) then
-							correct := True
-							utilisateur := mediatheque.get_lst_users.item(i)
-						end
-						i := i+1
+					if mediatheque.get_lst_users.item(i).get_identifiant.is_equal(identifiant) then
+						correct := True
+						utilisateur := mediatheque.get_lst_users.item(i)
 					end
-					if not correct then 
-						io.put_string("identifiant inconnu %N")
-					end
-					compteur := compteur + 1 
+					i := i+1
 				end
-				if compteur = 4 then 
-					io.put_string("Réservation toujours active !")
+				if not correct then 
+					io.put_string("Identifiant inconnu. %N")
 				end
-				if correct then
-					io.put_string("********Reservations de l'utilisateur********* %N %N")
+				compteur := compteur + 1 
+			end
+			if compteur = 4 then 
+				io.put_string("Réservation toujours active !")
+			end
+			if correct then
+				io.put_string("***** Réservations de l'utilisateur ***** %N")
+				if utilisateur.get_lst_reservations.count > 0 then
 					from i := 0
 					until i = utilisateur.get_lst_reservations.count
 					loop
 						if utilisateur.get_lst_reservations.item(i).get_dvd /= Void then
-							io.put_string((i+1).to_string+" ."+utilisateur.get_lst_reservations.item(i).get_dvd.get_titre+"%N")
+							io.put_string((i+1).to_string+". "+utilisateur.get_lst_reservations.item(i).get_dvd.get_titre+"%N")
 						else
-							io.put_string((i+1).to_string+" ."+utilisateur.get_lst_reservations.item(i).get_livre.get_titre+"%N")
+							io.put_string((i+1).to_string+". "+utilisateur.get_lst_reservations.item(i).get_livre.get_titre+"%N")
 						end
 						i:= i+1
 					end
@@ -971,7 +977,7 @@ feature{ANY}
 					from
 					until correct
 					loop
-						io.put_string("Quelle reservation devient un emprunt ? (Saisissez un numéro)")
+						io.put_string("Quelle réservation devient un emprunt ? (Saisissez son numéro)%N")
 						io.flush
 						io.read_integer
 						choix := io.last_integer
@@ -1003,10 +1009,13 @@ feature{ANY}
 						else
 							io.put_string("Le média n'existe pas %N")
 						end -- choix correct
-						
-							
-					end --correct
-				end--identifiant correct
+					
+					
+					end -- loop correct
+				else
+					io.put_string("Pas de réservation pour cet utilisateur.%N%N")
+				end
+			end--identifiant correct
 		end
 		
 	-- aprcours du fichier des emprunts et réécriture sans l'emprunt supprimé
@@ -1132,7 +1141,7 @@ feature{ANY}
 		do
 			io.put_string("********************************")
 			io.put_string("%N")
-			io.put_string("*    Liste des reservations    *")
+			io.put_string("*    LISTE DES RESERVATIONS    *")
 			io.put_string("%N")
 			io.put_string("********************************")
 			io.put_string("%N")
@@ -1141,7 +1150,7 @@ feature{ANY}
 			loop
 				utilisateur := mediatheque.get_lst_users.item(i)
 				if utilisateur.get_lst_reservations.count > 0 then
-					io.put_string(utilisateur.get_identifiant + " :"+utilisateur.get_prenom+" "+utilisateur.get_nom+":%N")
+					io.put_string(utilisateur.get_identifiant + " : "+utilisateur.get_prenom+" "+utilisateur.get_nom+": %N")
 					from j := 0
 					until j = utilisateur.get_lst_reservations.count
 					loop
@@ -1162,7 +1171,7 @@ feature{ANY}
 		do
 			io.put_string("********************************")
 			io.put_string("%N")
-			io.put_string("*    Liste des emprunts        *")
+			io.put_string("*      LISTE DES EMPRUNTS      *")
 			io.put_string("%N")
 			io.put_string("********************************")
 			io.put_string("%N")
@@ -1171,7 +1180,7 @@ feature{ANY}
 			loop
 				utilisateur := mediatheque.get_lst_users.item(i)
 				if utilisateur.get_lst_emprunts.count > 0 then
-					io.put_string(utilisateur.get_identifiant + " :"+utilisateur.get_prenom+" "+utilisateur.get_nom+":%N")
+					io.put_string(utilisateur.get_identifiant + " : "+utilisateur.get_prenom+" "+utilisateur.get_nom+": %N")
 					from j := 0
 					until j = utilisateur.get_lst_emprunts.count
 					loop
@@ -1189,16 +1198,17 @@ feature{ANY}
 			continuer : BOOLEAN
 			choix_gestion : INTEGER
 		do
-			io.put_string("********************************")
-			io.put_string("%N")
-			io.put_string("* Gestion Emprunt/Reservation  *")
-			io.put_string("%N")
-			io.put_string("********************************")
-			io.put_string("%N")
 			continuer := True
 			from
 			until not continuer
 			loop
+				io.put_string("%N")
+				io.put_string("*********************************")
+				io.put_string("%N")
+				io.put_string("* GESTION EMPRUNT & RESERVATION *")
+				io.put_string("%N")
+				io.put_string("*********************************")
+				io.put_string("%N")
 				io.put_string("Que souhaiter vous faire? %N")
 				io.put_string("1. Consulter les réservations %N")
 				io.put_string("2. Consulter les emprunts %N")
@@ -1206,7 +1216,6 @@ feature{ANY}
 				io.put_string("4. Annuler une réservation %N")
 				io.put_string("5. Réaliser un emprunt à partir d'une réservation %N")
 				io.put_string("6. Retour %N")
-				io.put_string("%N")
 				io.flush
 				io.read_integer
 				choix_gestion := io.last_integer
@@ -1240,8 +1249,5 @@ feature{ANY}
 			time.update
 			Result := time.year.to_string+time.month.to_string+time.day.to_string+time.hour.to_string+time.minute.to_string+time.second.to_string
 		end
-		
 
-		
-		
-	end
+end

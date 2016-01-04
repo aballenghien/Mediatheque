@@ -31,6 +31,11 @@ feature {ANY}
 		do
 			nombre_exemplaires := nb
 		end
+		
+	ajouter_un_exemplaire is
+		do
+			nombre_exemplaires := nombre_exemplaires + 1
+		end
 	
 	ajouter_emprunt (emp: EMPRUNT) : STRING is
 		local

@@ -36,7 +36,7 @@ feature{ANY}
 	analyser_fichier (fichier: TEXT_FILE_READ) is
 		local
 			ligne: STRING -- ligne du fichier média
-			i, index_start, index_end: INTEGER
+			i, index_start, index_end, position: INTEGER
 			titre: STRING 
 			livre: LIVRE
 			dvd: DVD
@@ -182,10 +182,20 @@ feature{ANY}
 					
 					--lst_medias.add_last(livre)
 					-- Ajout du média dans le tableau correspondant
-					if is_livre then				
-						mediatheque.get_lst_livres.add_last(livre)
+					if is_livre then		
+						position := livre_existe(livre)
+						if position = -1 then		
+							mediatheque.get_lst_livres.add_last(livre)
+						else
+							mediatheque.get_lst_livres.item(position).ajouter_un_exemplaire
+						end
 					else 
-						mediatheque.get_lst_dvd.add_last(dvd)
+						position := dvd_existe(dvd)
+						if position = -1 then		
+							mediatheque.get_lst_dvd.add_last(dvd)
+						else
+							mediatheque.get_lst_dvd.item(position).ajouter_un_exemplaire
+						end
 					end					
 				end							
 			end
@@ -593,12 +603,21 @@ feature{ANY}
 					io.put_string("%N")
 					io.put_string("2. Emprunter")
 					io.put_string("%N")
-					io.put_string("3. Retour")
-					io.put_string("%N")
+					if mediatheque.get_utilisateur_connecte.is_admin then
+						io.put_string("3. Modifier")
+						io.put_string("%N")
+						io.put_string("4. Retour")
+						io.put_string("%N")
+					else
+						io.put_string("3. Retour")
+						io.put_string("%N")
+					end
+					
 					io.flush
 					io.read_integer
 					reponse_int := io.last_integer
-					if reponse_int > 0 and reponse_int < 4 then
+					if (reponse_int > 0 and reponse_int < 5 and mediatheque.get_utilisateur_connecte.is_admin)
+						or (reponse_int > 0 and reponse_int < 4 and not mediatheque.get_utilisateur_connecte.is_admin) then
 						correct := True
 						if reponse_int = 1 then
 							io.put_string("Sur quel média voulez vous plus de détails ? (saisissez son numéro) %N")
@@ -609,16 +628,29 @@ feature{ANY}
 							afficher_detail_media(media)
 						end
 						if reponse_int = 2 then 
-							io.put_string("Quel media souhaitez vous emprunter? (saississez un numéro) %N")
+							io.put_string("Quel media souhaitez vous emprunter? (saississez son numéro) %N")
 							io.flush
 							io.read_integer
 							media := io.last_integer
 							media := media - 1
 							mediatheque.get_gestionnaire_emprunt_reservation.emprunter_un_media(media)
 						end
+						if reponse_int = 3 and mediatheque.get_utilisateur_connecte.is_admin then 
+							io.put_string("Quel media souhaitez vous modifier ? (saississez son numéro) %N")
+							io.flush
+							io.read_integer
+							media := io.last_integer
+							media := media - 1
+							modifier_media(media)
+						end
 					else
-						io.put_string("Veuillez taper soit 1, 2 ou 3")
-						io.put_string("%N")
+						if mediatheque.get_utilisateur_connecte.is_admin then
+							io.put_string("Veuillez taper soit 1, 2, 3 ou 4")
+							io.put_string("%N")
+						else
+							io.put_string("Veuillez taper soit 1, 2 ou 3")
+							io.put_string("%N")
+						end
 					end
 				end
 			end
@@ -652,7 +684,7 @@ feature{ANY}
 			from i:=0
 			until i = mediatheque.get_lst_livres.count
 			loop
-				if mediatheque.get_lst_livres.item(i).get_titre.has_substring(titre) then
+				if mediatheque.get_lst_livres.item(i).get_titre.as_lower.has_substring(titre.as_lower) then
 					mediatheque.get_lst_media_choisis.add_last(mediatheque.get_lst_livres.item(i))
 				end
 				i := i+1
@@ -661,7 +693,7 @@ feature{ANY}
 			from i:=0
 			until i = mediatheque.get_lst_dvd.count
 			loop
-				if mediatheque.get_lst_dvd.item(i).get_titre.has_substring(titre) then
+				if mediatheque.get_lst_dvd.item(i).get_titre.as_lower.has_substring(titre.as_lower) then
 					mediatheque.get_lst_media_choisis.add_last(mediatheque.get_lst_dvd.item(i))
 				end
 				i := i+1
@@ -688,8 +720,8 @@ feature{ANY}
 				loop
 					-- Si le nom et le prénom sont renseignés, on test sur les deux
 					if prenom.count > 0 and nom.count > 0 then
-						if mediatheque.get_lst_auteurs.item(i).get_nom.is_equal(nom) 
-						and mediatheque.get_lst_auteurs.item(i).get_prenom.is_equal(prenom) then
+						if mediatheque.get_lst_auteurs.item(i).get_nom.as_lower.is_equal(nom.as_lower) 
+						and mediatheque.get_lst_auteurs.item(i).get_prenom.as_lower.is_equal(prenom.as_lower) then
 							-- on récupére tous les livres liés à l'auteur
 							from j := 0
 							until j = mediatheque.get_lst_auteurs.item(i).get_lst_livres.count
@@ -701,7 +733,7 @@ feature{ANY}
 					else
 						-- sinon on test que sur le nom
 						if nom.count > 0 then
-							if mediatheque.get_lst_auteurs.item(i).get_nom.is_equal(nom) then
+							if mediatheque.get_lst_auteurs.item(i).get_nom.as_lower.is_equal(nom.as_lower) then
 								-- on récupére tous les livres liés à l'auteur
 								from j := 0
 								until j = mediatheque.get_lst_auteurs.item(i).get_lst_livres.count
@@ -723,8 +755,8 @@ feature{ANY}
 				loop
 					-- Si le nom et le prénom sont renseignés, on test sur les deux
 					if prenom.count > 0 and nom.count > 0 then
-						if mediatheque.get_lst_acteurs.item(i).get_nom.is_equal(nom) 
-						and mediatheque.get_lst_acteurs.item(i).get_prenom.is_equal(prenom) then
+						if mediatheque.get_lst_acteurs.item(i).get_nom.as_lower.is_equal(nom.as_lower) 
+						and mediatheque.get_lst_acteurs.item(i).get_prenom.as_lower.is_equal(prenom.as_lower) then
 							-- on récupére tous les dvd liés à l'acteur
 							from j := 0
 							until j = mediatheque.get_lst_acteurs.item(i).get_lst_films.count
@@ -736,7 +768,7 @@ feature{ANY}
 					else
 						-- sinon on test que sur le nom
 						if nom.count > 0 then
-							if mediatheque.get_lst_acteurs.item(i).get_nom.is_equal(nom) then
+							if mediatheque.get_lst_acteurs.item(i).get_nom.as_lower.is_equal(nom.as_lower) then
 								-- on récupére tous les dvd liés à l'acteur
 								from j := 0
 								until j = mediatheque.get_lst_acteurs.item(i).get_lst_films.count
@@ -758,8 +790,8 @@ feature{ANY}
 				loop
 					-- Si le nom et le prénom sont renseignés, on test sur les deux
 					if prenom.count > 0 and nom.count > 0 then
-						if mediatheque.get_lst_realisateurs.item(i).get_nom.is_equal(nom) 
-						and mediatheque.get_lst_realisateurs.item(i).get_prenom.is_equal(prenom) then
+						if mediatheque.get_lst_realisateurs.item(i).get_nom.as_lower.is_equal(nom.as_lower) 
+						and mediatheque.get_lst_realisateurs.item(i).get_prenom.as_lower.is_equal(prenom.as_lower) then
 							-- on récupére tous les dvd liés au réalisateur
 							from j := 0
 							until j = mediatheque.get_lst_realisateurs.item(i).get_lst_films.count
@@ -771,7 +803,7 @@ feature{ANY}
 					else
 						-- sinon on test que sur le nom
 						if nom.count > 0 then
-							if mediatheque.get_lst_realisateurs.item(i).get_nom.is_equal(nom) then
+							if mediatheque.get_lst_realisateurs.item(i).get_nom.as_lower.is_equal(nom.as_lower) then
 								-- on récupére tous les dvd liés au réalisateur
 								from j := 0
 								until j = mediatheque.get_lst_realisateurs.item(i).get_lst_films.count
@@ -1291,9 +1323,231 @@ feature{ANY}
 					io.put_string("%N")
 					i := i+1
 				end
-			end
-					
+			end	
 		end
 		
+	modifier_media(choix_media : INTEGER) is
+		local
+			livre, new_livre : LIVRE
+			dvd, new_dvd : DVD
+			i,j : INTEGER
+		do
+			from i:= 0
+			until i = mediatheque.get_lst_media_choisis.count
+			loop
+				if i = choix_media then
+					if mediatheque.get_lst_media_choisis.item(i).to_string.has_substring("LIVRE") then
+						from j:= 0
+						until j = mediatheque.get_lst_livres.count
+						loop
+							if mediatheque.get_lst_livres.item(j).get_titre = mediatheque.get_lst_media_choisis.item(i).get_titre then
+								livre := mediatheque.get_lst_livres.item(j)
+							end
+							j := j+1
+						end
+					else 
+						from j:= 0
+						until j = mediatheque.get_lst_dvd.count
+						loop
+							if mediatheque.get_lst_dvd.item(j).get_titre = mediatheque.get_lst_media_choisis.item(i).get_titre then
+								dvd := mediatheque.get_lst_dvd.item(j)
+							end
+							j := j+1
+						end
+					end
+				end
+				i := i+1
+			end
+			
+			if livre /= Void then
+				new_livre := modifier_livre(livre)
+			else
+				new_dvd := modifier_dvd(dvd)
+			end
+			
+		end
 	
-	end
+	modifier_livre(livre : LIVRE) : LIVRE is
+		local
+			choix : STRING
+		do
+			choix := ""
+			io.put_string("Titre actuel : "+livre.get_titre+"%N")
+			io.put_string("Modifier titre ? O/N %N")
+			io.flush
+			io.read_line
+			io.read_line
+			choix.copy(io.last_string)
+			if choix.is_equal("O") then
+				io.put_string("Nouveau titre : ")
+				io.flush
+				io.read_line
+				livre.set_titre(io.last_string)
+			end
+			io.put_string("Auteur actuel : "+livre.get_auteur.get_nom+" "+livre.get_auteur.get_prenom+"%N")
+			io.put_string("Modifier auteur ? O/N %N")
+			io.flush
+			io.read_line
+			choix.copy(io.last_string)
+			if choix.is_equal("O") then
+				io.put_string("Prénom auteur : ")
+				io.flush
+				io.read_line
+				livre.get_auteur.set_prenom(io.last_string)
+				io.put_string("Nom auteur : ")
+				io.flush
+				io.read_line
+				livre.get_auteur.set_nom(io.last_string)
+			end
+			io.put_string("Nombre d'exemplaires actuel : "+livre.get_nombre_exemplaires.to_string+"%N")
+			io.put_string("Ajouter un exemplaire ? O/N %N")
+			io.flush
+			io.read_line
+			choix.copy(io.last_string)
+			if choix.is_equal("O") then
+				livre.ajouter_un_exemplaire
+				io.put_string("Nouveau nombre d'exemplaires: "+livre.get_nombre_exemplaires.to_string+"%N")
+			end
+			Result := livre
+		end
+		
+	modifier_dvd(dvd : DVD) : DVD is
+		local
+			choix : STRING
+			continuer : BOOLEAN
+			acteur : ACTEUR
+			realisateur : REALISATEUR
+		do
+			choix := ""
+			io.put_string("Titre actuel : "+dvd.get_titre+"%N")
+			io.put_string("Modifier titre ? O/N %N")
+			io.flush
+			io.read_line
+			io.read_line
+			choix.copy(io.last_string)
+			if choix.is_equal("O") then
+				io.put_string("Nouveau titre : ")
+				io.flush
+				io.read_line
+				dvd.set_titre(io.last_string)
+			end
+			io.put_string("Nombre d'exemplaires actuel : "+dvd.get_nombre_exemplaires.to_string+"%N")
+			io.put_string("Ajouter un exemplaire ? O/N %N")
+			io.flush
+			io.read_line
+			choix.copy(io.last_string)
+			if choix.is_equal("O") then
+				dvd.ajouter_un_exemplaire
+				io.put_string("Nouveau nombre d'exemplaires: "+dvd.get_nombre_exemplaires.to_string+"%N")
+			end
+			io.put_string("Année de parution actuelle : "+dvd.get_annee.to_string+"%N")
+			io.put_string("Modifier année ? O/N %N")
+			io.flush
+			io.read_line
+			choix.copy(io.last_string)
+			if choix.is_equal("O") then
+				io.put_string("Nouvelle année : ")
+				io.flush
+				io.read_integer
+				dvd.set_annee(io.last_integer)
+			end
+			io.put_string("Ajouter un acteur ? O/N %N")
+			io.flush
+			io.read_line
+			io.read_line
+			choix.copy(io.last_string)
+			if choix.is_equal("O") then
+				continuer := True
+				from
+				until not continuer
+				loop
+					create acteur.make
+					io.put_string("Prénom acteur : ")
+					io.flush
+					io.read_line
+					acteur.set_prenom(io.last_string)
+					io.put_string("Nom acteur : ")
+					io.flush
+					io.read_line
+					acteur.set_nom(io.last_string)
+					dvd.ajouter_acteur(acteur)
+					io.put_string("Ajouter un autre acteur ? O/N%N")
+					io.flush
+					io.read_line
+					choix.copy(io.last_string)
+					if choix.is_equal("N") then
+						continuer := False
+					end
+				end
+			end
+			io.put_string("Ajouter un réalisateur ? O/N %N")
+			io.flush
+			io.read_line
+			choix.copy(io.last_string)
+			if choix.is_equal("O") then
+				continuer := True
+				from
+				until not continuer
+				loop
+					create realisateur.make
+					io.put_string("Prénom réalisateur : ")
+					io.flush
+					io.read_line
+					realisateur.set_prenom(io.last_string)
+					io.put_string("Nom réalisateur : ")
+					io.flush
+					io.read_line
+					realisateur.set_nom(io.last_string)
+					dvd.ajouter_realisateur(realisateur)
+					io.put_string("Ajouter un autre réalisateur ? O/N%N")
+					io.flush
+					io.read_line
+					choix.copy(io.last_string)
+					if choix.is_equal("N") then
+						continuer := False
+					end
+				end
+			end
+			Result := dvd
+		end
+		
+	-- Vérifie si un livre existe déjà, s'il existe renvoie sa position dans la liste
+	livre_existe(livre : LIVRE) : INTEGER is
+		local
+			i, position : INTEGER
+		do
+			position := -1
+			from i:=0
+			until i = mediatheque.get_lst_livres.count
+			loop
+				if mediatheque.get_lst_livres.item(i).get_titre.is_equal(livre.get_titre)
+				and mediatheque.get_lst_livres.item(i).get_auteur.get_nom.is_equal(livre.get_auteur.get_nom)
+				and mediatheque.get_lst_livres.item(i).get_auteur.get_prenom.is_equal(livre.get_auteur.get_prenom) then
+					position := i
+				end
+				i := i+1
+			end
+			Result := position
+		end
+		
+	-- Vérifie si un livre existe déjà, s'il existe renvoie sa position dans la liste
+	dvd_existe(dvd : DVD) : INTEGER is
+		local
+			i,position : INTEGER
+		do
+			position := -1
+			from i:=0
+			until i = mediatheque.get_lst_dvd.count
+			loop
+				if mediatheque.get_lst_dvd.item(i).get_titre.is_equal(dvd.get_titre)
+				and mediatheque.get_lst_dvd.item(i).get_annee = dvd.get_annee
+				and mediatheque.get_lst_dvd.item(i).get_type.is_equal(dvd.get_type) then
+					position := i
+				end
+				i := i+1
+			end
+			Result := position
+		end
+	
+	
+end
