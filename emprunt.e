@@ -4,7 +4,7 @@ creation{ANY}
 	make
 
 feature{}
-	numero : INTEGER
+	numero : STRING
 	user: UTILISATEUR
 	livre: LIVRE
 	dvd : DVD
@@ -18,9 +18,9 @@ feature{ANY}
 	afficher_contenu_emprunt : STRING is
 		do
 			if livre/= Void then
-				Result := "%T"+livre.get_titre
+				Result := "%T LIVRE : "+livre.get_titre
 			else 
-				Result := "%T"+dvd.get_titre
+				Result := "%T DVD : "+dvd.get_titre
 			end
 		end
 		
@@ -29,7 +29,7 @@ feature{ANY}
 			rst : STRING
 		do
 			rst := ""
-			rst.copy("Numero<"+numero.to_string+"> ; ")
+			rst.copy("Numero<"+numero+"> ; ")
 			rst.append("Utilisateur<"+user.get_identifiant+"> ; ")
 			if livre /= Void then
 				rst.append("LIVRE<"+livre.get_titre+">  ")
@@ -64,7 +64,7 @@ feature{ANY}
 			Result := dvd
 		end
 	
-	get_numero : INTEGER is
+	get_numero : STRING is
 		do
 			Result := numero
 		end
@@ -84,7 +84,7 @@ feature{ANY}
 			dvd := d
 		end
 		
-	set_numero(n : INTEGER) is
+	set_numero(n : STRING) is
 		do
 			numero := n
 		end

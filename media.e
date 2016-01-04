@@ -112,6 +112,42 @@ feature {ANY}
 			end
 			Result := ajouter
 		end
+	
+	supprimer_reservation (reservation : RESERVATION) is
+		local 
+			i : INTEGER
+		do
+			if lst_reservations.count > 1 then
+				from i := 0
+				until i = lst_reservations.count
+				loop
+					if lst_reservations.item(i).get_numero.is_equal(reservation.get_numero) then
+						lst_reservations.remove(i)
+					end
+					i := i+1
+				end
+			else
+				create lst_reservations.with_capacity(1,0)
+			end
+		end
+		
+	supprimer_emprunt (emprunt : EMPRUNT) is
+		local 
+			i : INTEGER
+		do
+			if lst_emprunts.count > 1 then
+				from i := 0
+				until i = lst_emprunts.count
+				loop
+					if lst_emprunts.item(i).get_numero.is_equal(emprunt.get_numero) then
+						lst_emprunts.remove(i)
+					end
+					i := i+1
+				end
+			else
+				create lst_emprunts.with_capacity(1,0)
+			end
+		end
 		
 	get_titre : STRING is
 		do

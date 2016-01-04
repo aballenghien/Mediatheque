@@ -319,7 +319,7 @@ feature{ANY}
 					io.put_string("%N")
 				end
 			elseif utilisateur_connecte.is_admin then
-				if choix > 0 and choix < 9 then
+				if choix > 0 and choix < 10 then
 					inspect choix
 					when 1 then
 						afficher_menu_consultation
@@ -346,7 +346,7 @@ feature{ANY}
 						continuer := False
 					end
 				else
-					io.put_string("Veuillez choisir un chiffre entre 1 et 8")
+					io.put_string("Veuillez choisir un chiffre entre 1 et 9")
 					io.put_string("%N")
 				end
 			end
