@@ -137,7 +137,7 @@ feature {ANY}
 		do
 			if lst_emprunts.count > 1 then
 				from i := 0
-				until i = lst_emprunts.count
+				until i < lst_emprunts.count
 				loop
 					if lst_emprunts.item(i).get_numero.is_equal(emprunt.get_numero) then
 						lst_emprunts.remove(i)

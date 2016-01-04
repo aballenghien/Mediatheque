@@ -409,7 +409,7 @@ feature{ANY}
 				end	
 				--ajouter_emprunt retourneFAIT si l'utilisateur possède déjà le média 
 				if ajouter_ds_media.is_equal("FAIT") then
-					io.put_string("Vous empruntez déjà ce livre! %N")u
+					io.put_string("Vous empruntez déjà ce livre! %N")
 					reserver := False
 				end	
 				
@@ -721,7 +721,9 @@ feature{ANY}
 				loop
 					io.put_string("Tapez l'identifiant d'un utilisateur : %N")
 					io.flush
-					io.read_line
+					if compteur = 1 then
+						io.read_line
+					end
 					io.read_line
 					identifiant := io.last_string
 					from i := 0
@@ -743,35 +745,39 @@ feature{ANY}
 				end
 				if correct then
 					io.put_string("********Emprunts de l'utilisateur********* %N %N")
-					from i := 0
-					until i = utilisateur.get_lst_emprunts.count
-					loop
-						if utilisateur.get_lst_emprunts.item(i).get_dvd /= Void then
-							io.put_string((i+1).to_string+" ."+utilisateur.get_lst_emprunts.item(i).get_dvd.get_titre+"%N")
-						else
-							io.put_string((i+1).to_string+" ."+utilisateur.get_lst_emprunts.item(i).get_livre.get_titre+"%N")
+					if  utilisateur.get_lst_emprunts.count > 0 then
+						from i := 0
+						until i = utilisateur.get_lst_emprunts.count
+						loop
+							if utilisateur.get_lst_emprunts.item(i).get_dvd /= Void then
+								io.put_string((i+1).to_string+" ."+utilisateur.get_lst_emprunts.item(i).get_dvd.get_titre+"%N")
+							else
+								io.put_string((i+1).to_string+" ."+utilisateur.get_lst_emprunts.item(i).get_livre.get_titre+"%N")
+							end
+							i:= i+1
 						end
-						i:= i+1
-					end
-					io.put_string("%N")
-					correct := False
-					from
-					until correct
-					loop
-						io.put_string("Quel emprunt se termine ? (Saisissez un numéro)")
-						io.flush
-						io.read_integer
-						choix := io.last_integer
-						if choix > 0 and choix <= i then
-							--suppression de l'emprunt du fichier des emprunts
-							supprimer_emprunt_fichier(utilisateur.get_lst_emprunts.item(choix-1))
-							-- suppression de l'emprunt de la liste de l'utilisateur concerné
-							utilisateur.get_lst_emprunts.remove(choix-1)
-							-- suppression de l'emprunt pour le média concerné dans la liste des médias
-							supprimer_emprunt_liste_medias(utilisateur.get_lst_emprunts.item(choix-1))
-							correct := True
-							io.put_string("Emprunt terminé ! %N")
+						io.put_string("%N")
+						correct := False
+						from
+						until correct
+						loop
+							io.put_string("Quel emprunt se termine ? (Saisissez un numéro)")
+							io.flush
+							io.read_integer
+							choix := io.last_integer
+							if choix > 0 and choix <= i then							
+								-- suppression de l'emprunt pour le média concerné dans la liste des médias
+								supprimer_emprunt_liste_medias(utilisateur.get_lst_emprunts.item(choix-1))
+								--suppression de l'emprunt du fichier des emprunts
+								supprimer_emprunt_fichier(utilisateur.get_lst_emprunts.item(choix-1))
+								-- suppression de l'emprunt de la liste de l'utilisateur concerné
+								utilisateur.get_lst_emprunts.remove(choix-1)
+								correct := True
+								io.put_string("Emprunt terminé ! %N")
+							end
 						end
+					else
+						io.put_string("Aucun emprunt en cours!%N")
 					end
 				end
 			end
@@ -801,7 +807,9 @@ feature{ANY}
 				loop
 					io.put_string("Tapez l'identifiant d'un utilisateur : %N")
 					io.flush
-					io.read_line
+					if compteur =1 then
+						io.read_line
+					end
 					io.read_line
 					identifiant := io.last_string
 					from i := 0
@@ -823,35 +831,39 @@ feature{ANY}
 				end
 				if correct then
 					io.put_string("********Reservations de l'utilisateur********* %N %N")
-					from i := 0
-					until i = utilisateur.get_lst_reservations.count
-					loop
-						if utilisateur.get_lst_reservations.item(i).get_dvd /= Void then
-							io.put_string((i+1).to_string+" ."+utilisateur.get_lst_reservations.item(i).get_dvd.get_titre+"%N")
-						else
-							io.put_string((i+1).to_string+" ."+utilisateur.get_lst_reservations.item(i).get_livre.get_titre+"%N")
+					if utilisateur.get_lst_reservations.count > 0 then
+						from i := 0
+						until i = utilisateur.get_lst_reservations.count
+						loop
+							if utilisateur.get_lst_reservations.item(i).get_dvd /= Void then
+								io.put_string((i+1).to_string+" ."+utilisateur.get_lst_reservations.item(i).get_dvd.get_titre+"%N")
+							else
+								io.put_string((i+1).to_string+" ."+utilisateur.get_lst_reservations.item(i).get_livre.get_titre+"%N")
+							end
+							i:= i+1
 						end
-						i:= i+1
-					end
-					io.put_string("%N")
-					correct := False
-					from
-					until correct
-					loop
-						io.put_string("Quel reservation doit être annulée ? (Saisissez un numéro)")
-						io.flush
-						io.read_integer
-						choix := io.last_integer
-						if choix > 0 and choix <= i then
-							--suppression de la réservation dans le fichier des réservations
-							supprimer_reservation_fichier(utilisateur.get_lst_reservations.item(choix-1))
-							-- suppression de la réservation dans la liste de l'utilisateur concerné
-							utilisateur.get_lst_reservations.remove(choix-1)
-							-- suppression de la réservation pour le média concerné
-							supprimer_reservation_liste_medias(utilisateur.get_lst_reservations.item(choix-1))
-							correct := True
-							io.put_string("Reservation annulée ! %N")
+						io.put_string("%N")
+						correct := False
+						from
+						until correct
+						loop
+							io.put_string("Quel reservation doit être annulée ? (Saisissez un numéro)")
+							io.flush
+							io.read_integer
+							choix := io.last_integer
+							if choix > 0 and choix <= i then
+								--suppression de la réservation dans le fichier des réservations
+								supprimer_reservation_fichier(utilisateur.get_lst_reservations.item(choix-1))
+								-- suppression de la réservation dans la liste de l'utilisateur concerné
+								utilisateur.get_lst_reservations.remove(choix-1)
+								-- suppression de la réservation pour le média concerné
+								supprimer_reservation_liste_medias(utilisateur.get_lst_reservations.item(choix-1))
+								correct := True
+								io.put_string("Reservation annulée ! %N")
+							end
 						end
+					else
+						io.put_string("Aucune réservation en cours! %N")
 					end
 				end
 			end	
