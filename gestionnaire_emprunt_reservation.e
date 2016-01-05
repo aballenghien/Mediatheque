@@ -1147,7 +1147,7 @@ feature{ANY}
 			utilisateur: UTILISATEUR
 			trouve : BOOLEAN
 		do
-			trouve := True
+			trouve := False
 			io.put_string("********************************")
 			io.put_string("%N")
 			io.put_string("*    LISTE DES RESERVATIONS    *")
@@ -1168,8 +1168,6 @@ feature{ANY}
 					end
 					io.put_string("--------------------------------%N")
 					trouve := True
-				else
-					trouve := False
 				end
 				i := i+1
 			end
@@ -1185,6 +1183,7 @@ feature{ANY}
 			utilisateur: UTILISATEUR
 			trouve : BOOLEAN
 		do
+			trouve := False
 			io.put_string("********************************")
 			io.put_string("%N")
 			io.put_string("*      LISTE DES EMPRUNTS      *")
@@ -1205,8 +1204,6 @@ feature{ANY}
 					end
 					io.put_string("--------------------------------%N")
 					trouve := True
-				else
-					trouve := False
 				end
 				i := i+1
 			end
