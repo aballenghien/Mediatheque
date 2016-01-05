@@ -88,7 +88,4 @@ feature{ANY}
 		do
 			numero := n
 		end
-		
-	
-
 end

@@ -23,8 +23,16 @@ feature{ANY}
 		end
 
 	to_string : STRING is
+		local
+			retour : STRING
 		do
-			Result:= "UTILISATEUR :  %N %T Nom : "+nom+" %N %T Prénom : "+prenom+" %N %T Identifiant : "+identifiant
+			retour := ""
+			retour.copy("UTILISATEUR :  %N %T Nom : "+nom+" %N %T Prénom : "+prenom+" %N %T Identifiant : "+identifiant)
+			if is_admin then
+				retour.append("%N %T Administrateur : Oui")
+			end
+			retour.append("%N")
+			Result:= retour
 		end
 
 	-- getter et setter

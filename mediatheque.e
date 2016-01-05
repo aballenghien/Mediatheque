@@ -287,20 +287,28 @@ feature{ANY}
 			end
 			io.put_string("%N")
 			io.put_string("3. Gérer mes réservations / mes emprunts")
-			io.put_string("%N")			
+			io.put_string("%N")	
 			if utilisateur_connecte.is_admin then
-				io.put_string("4. Consulter la liste des utilisateurs")
+				io.put_string("4. Gérer les réservations et emprunts des utilisateurs")
+				io.put_string("%N")	
+				io.put_string("5. Ajouter un média")
+				io.put_string("%N")	
+				io.put_string("6. Consulter la liste des utilisateurs")
+				io.put_string("%N")						
+				io.put_string("7. Recherche un utilisateur")
+				io.put_string("%N")	
+				io.put_string("8. Ajouter un utilisateur")
+				io.put_string("%N")		
+				io.put_string("9. Modifier un utilisateur")
+				io.put_string("%N")	
+				io.put_string("10. Consulter les informations de mon compte")
+				io.put_string("%N")	
+				io.put_string("11. Déconnexion")
 				io.put_string("%N")
-				io.put_string("5. Ajouter un utilisateur")
-				io.put_string("%N")
-				io.put_string("6. Ajouter un média")
-				io.put_string("%N")
-				io.put_string("7. Gérer les réservations et emprunts des utilisateurs")
-				io.put_string("%N")
-				io.put_string("8. Déconnexion")
-				io.put_string("%N")
-			else
-				io.put_string("4. Déconnexion")
+			else	
+			io.put_string("4. Consulter les informations de mon compte")
+			io.put_string("%N")	
+				io.put_string("5. Déconnexion")
 				io.put_string("%N")
 			end
 			
@@ -310,7 +318,7 @@ feature{ANY}
 			choix := io.last_integer
 			
 			if not utilisateur_connecte.is_admin then
-				if choix > 0 and choix < 5 then
+				if choix > 0 and choix < 6 then
 					inspect choix
 					when 1 then
 						afficher_menu_consultation
@@ -319,6 +327,8 @@ feature{ANY}
 					when 3 then
 						gestionnaire_emprunt_reservation.gerer_emprunt_reservation
 					when 4 then
+						gestionnaire_utilisateur.afficher_info_compte(utilisateur_connecte)
+					when 5 then
 						io.put_string("Déconnexion")
 						io.put_string("%N")
 						continuer := False
@@ -328,7 +338,7 @@ feature{ANY}
 					io.put_string("%N")
 				end
 			elseif utilisateur_connecte.is_admin then
-				if choix > 0 and choix < 9 then
+				if choix > 0 and choix < 12 then
 					inspect choix
 					when 1 then
 						afficher_menu_consultation
@@ -337,16 +347,21 @@ feature{ANY}
 					when 3 then
 						gestionnaire_emprunt_reservation.gerer_emprunt_reservation
 					when 4 then
-						afficher_tableau("USER")
-						io.put_string("%N")
+						gestionnaire_emprunt_reservation.gerer_emprunts_reservations_admin
 					when 5 then
+						gestionnaire_media.ajouter_media
+					when 6 then
+						afficher_tableau("USER")
+					when 7 then
+						gestionnaire_utilisateur.rechercher
+					when 8 then
 						gestionnaire_utilisateur.ajouter_utilisateur
 						io.put_string("%N")
-					when 6 then
-						gestionnaire_media.ajouter_media
-					when 7 then
-						gestionnaire_emprunt_reservation.gerer_emprunts_reservations_admin
-					when 8 then
+					when 9 then
+						gestionnaire_utilisateur.modifier_un_utilisateur
+					when 10 then
+						gestionnaire_utilisateur.afficher_info_compte(utilisateur_connecte)
+					when 11 then
 						io.put_string("Déconnexion")
 						io.put_string("%N")
 						continuer := False

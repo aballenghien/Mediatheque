@@ -264,7 +264,254 @@ feature{ANY}
 			end
 		end
 		
-		-- Fonction recherchant un utilisateur dans la liste des utilisateurs	
+	afficher_info_compte(user : UTILISATEUR) is
+		local
+			choix : INTEGER
+			correct : BOOLEAN
+		do
+			correct := False
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*  DETAILS COMPTE UTILISATEUR  *")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string(user.to_string)
+			io.put_string("%N")
+			from
+			until correct
+			loop
+				io.put_string("1. Modifier information%N")
+				io.put_string("2. Retour%N")
+				io.flush
+				io.read_integer
+				choix := io.last_integer
+				if choix = 1 then
+					correct := True
+					modifier_utilisateur(user, False)
+				elseif choix = 2 then
+					correct := True
+				end
+			end			
+		end
+		
+	modifier_un_utilisateur is
+		local
+			identifiant, choix : STRING
+			user : UTILISATEUR
+			id_ok, correct, premier : BOOLEAN
+		do
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*     MODIFIER UTILISATEUR     *")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			identifiant := ""	
+			choix := ""		
+			premier := True
+			id_ok := False
+			from
+			until id_ok
+			loop
+				io.put_string("Identifiant de l'utilisateur à modifier ?%N")
+				io.flush
+				if premier then
+					io.read_line
+					premier := False
+				end
+				io.read_line
+				identifiant.copy(io.last_string)
+				user := rechercher_utilisateur(identifiant)
+				if user /= Void then
+					id_ok := True
+					modifier_utilisateur(user, True)	
+				else
+					correct := False
+					from
+					until correct
+					loop
+						io.put_string("L'identifiant saisi ne correspond à aucun utilisateur. Réesayer ? (O/N)%N")
+						io.flush
+						io.read_line
+						choix.copy(io.last_string)
+						if choix.is_equal("O") then
+							correct := True
+							id_ok := False
+						elseif choix.is_equal("N") then
+							correct := True
+							id_ok := True
+						else
+							io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+						end
+					end
+				end
+			end							
+		end
+	
+	modifier_utilisateur(user : UTILISATEUR; modifier : BOOLEAN) is
+		local
+			choix : STRING
+			correct : BOOLEAN
+		do
+			choix := ""
+			if not modifier then
+				io.put_string("%N")
+				io.put_string("*********************************")
+				io.put_string("%N")
+				io.put_string("*  MODIFIER COMPTE UTILISATEUR  *")
+				io.put_string("%N")
+				io.put_string("*********************************")
+				io.put_string("%N")
+			end
+			io.put_string("Nom actuel : "+user.get_nom+"%N")
+			correct := False
+			from
+			until correct
+			loop
+				io.put_string("Modifier nom ? (O/N) %N")
+				io.flush
+				if not modifier then
+					io.read_line
+				end
+				io.read_line
+				choix.copy(io.last_string)
+				if choix.is_equal("O") then
+					io.put_string("Nouveau nom : ")
+					io.flush
+					io.read_line
+					user.set_nom(io.last_string)
+					correct := True
+				elseif choix.is_equal("N") then
+					correct := True
+				else
+					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+				end
+			end
+			
+			io.put_string("Prénom actuel : "+user.get_prenom+"%N")
+			correct := False
+			from
+			until correct
+			loop
+				io.put_string("Modifier prénom ? (O/N) %N")
+				io.flush
+				io.read_line
+				choix.copy(io.last_string)
+				if choix.is_equal("O") then
+					io.put_string("Nouveau prénom : ")
+					io.flush
+					io.read_line
+					user.set_prenom(io.last_string)
+					correct := True
+				elseif choix.is_equal("N") then
+					correct := True
+				else
+					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+				end
+			end
+			
+			if mediatheque.get_utilisateur_connecte.is_admin then
+				correct := False
+				if user.is_admin then
+					from
+					until correct
+					loop
+						io.put_string("L'utilisateur est administrateur. %N")
+						io.put_string("Changer son statut ? (O/N) (il deviendra non administrateur) %N")
+						io.flush
+						io.read_line
+						choix.copy(io.last_string)
+						if choix.is_equal("O") then
+							user.set_admin(False)
+							correct := True
+						elseif choix.is_equal("N") then
+							correct := True
+						else
+							io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+						end
+					end
+				else
+					from
+					until correct
+					loop
+						io.put_string("L'utilisateur n'est pas administrateur. %N")
+						io.put_string("Changer son statut ? (O/N) (il deviendra administrateur) %N")
+						io.flush
+						io.read_line
+						choix.copy(io.last_string)
+						if choix.is_equal("O") then
+							user.set_admin(True)
+							correct := True
+						elseif choix.is_equal("N") then
+							correct := True
+						else
+							io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+						end
+					end
+				end
+			end
+		end
+		
+	rechercher is
+		local
+			identifiant, choix : STRING
+			user : UTILISATEUR
+			id_ok, correct, premier : BOOLEAN
+		do
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*    RECHERCHER UTILISATEUR    *")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			identifiant := ""	
+			choix := ""		
+			premier := True
+			id_ok := False
+			from
+			until id_ok
+			loop
+				io.put_string("Identifiant de l'utilisateur à rechercher ?%N")
+				io.flush
+				if premier then
+					io.read_line
+					premier := False
+				end
+				io.read_line
+				identifiant.copy(io.last_string)
+				user := rechercher_utilisateur(identifiant)
+				if user /= Void then
+					id_ok := True
+					afficher_info_compte(user)
+				else
+					correct := False
+					from
+					until correct
+					loop
+						io.put_string("L'identifiant saisi ne correspond à aucun utilisateur. Réesayer ? (O/N)%N")
+						io.flush
+						io.read_line
+						choix.copy(io.last_string)
+						if choix.is_equal("O") then
+							correct := True
+							id_ok := False
+						elseif choix.is_equal("N") then
+							correct := True
+							id_ok := True
+						else
+							io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+						end
+					end
+				end
+			end							
+		end
+	
+	
+	-- Fonction recherchant un utilisateur dans la liste des utilisateurs	
 	rechercher_utilisateur(identifiant : STRING) : UTILISATEUR is
 		local
 			i : INTEGER
