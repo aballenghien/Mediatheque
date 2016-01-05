@@ -1460,10 +1460,12 @@ feature{ANY}
 			continuer, correct, correct_a : BOOLEAN
 			acteur : ACTEUR
 			realisateur : REALISATEUR
+			modifier_annee : BOOLEAN
 		do
 			choix := ""
 			io.put_string("Titre actuel : "+dvd.get_titre+"%N")
 			correct := False
+			modifier_annee := False
 			from
 			until correct
 			loop
@@ -1513,6 +1515,7 @@ feature{ANY}
 				io.read_line
 				choix.copy(io.last_string)
 				if choix.is_equal("O") then
+					modifier_annee := True
 					io.put_string("Nouvelle année : ")
 					io.flush
 					io.read_integer
@@ -1531,7 +1534,10 @@ feature{ANY}
 				io.put_string("Ajouter un acteur ? O/N %N")
 				io.flush
 				io.read_line
-				io.read_line
+				if modifier_annee then
+					modifier_annee := False
+					io.read_line
+				end
 				choix.copy(io.last_string)
 				if choix.is_equal("O") then
 					continuer := True
