@@ -577,7 +577,6 @@ feature{ANY}
 				io.put_string("2. Consulter mes emprunts %N")
 				io.put_string("3. Annuler une réservation %N")
 				io.put_string("4. Retour %N")
-				io.put_string("%N")
 				io.flush
 				io.read_integer
 				choix_gestion := io.last_integer
@@ -623,7 +622,6 @@ feature{ANY}
 			if mediatheque.get_utilisateur_connecte.get_lst_reservations.count = 0 then
 				io.put_string("Aucune réservation en cours ! %N")
 			end
-			io.put_string("%N %N")
 		end
 		
 	-- affichage de tous les emprunts actuels de l'utilisateur connecte
@@ -651,7 +649,6 @@ feature{ANY}
 			if mediatheque.get_utilisateur_connecte.get_lst_emprunts.count = 0 then
 				io.put_string("Aucun emprunt en cours ! %N")
 			end
-			io.put_string("%N %N")
 		end
 		
 	-- annulation d'une réservation par l'utilisateur connecte
@@ -701,7 +698,6 @@ feature{ANY}
 					end
 				end
 			end
-			io.put_string("%N %N")
 		end 
 	-- fin d'un emprunt, l'ouvrage est de nouveau disponbile (réaliser par un administrateur)
 	retourner_emprunt is
@@ -1138,7 +1134,9 @@ feature{ANY}
 		local
 			i,j: INTEGER
 			utilisateur: UTILISATEUR
+			trouve : BOOLEAN
 		do
+			trouve := True
 			io.put_string("********************************")
 			io.put_string("%N")
 			io.put_string("*    LISTE DES RESERVATIONS    *")
@@ -1158,8 +1156,14 @@ feature{ANY}
 						j := j+1
 					end
 					io.put_string("--------------------------------%N")
+					trouve := True
+				else
+					trouve := False
 				end
 				i := i+1
+			end
+			if not trouve then
+				io.put_string("Pas de réservation en cours.%N")
 			end
 		end
 		
@@ -1168,6 +1172,7 @@ feature{ANY}
 		local
 			i,j: INTEGER
 			utilisateur: UTILISATEUR
+			trouve : BOOLEAN
 		do
 			io.put_string("********************************")
 			io.put_string("%N")
@@ -1188,8 +1193,15 @@ feature{ANY}
 						j := j+1
 					end
 					io.put_string("--------------------------------%N")
+					trouve := True
+				else
+					trouve := False
 				end
 				i := i+1
+			end
+			
+			if not trouve then
+				io.put_string("Pas d'emprunt en cours.%N")
 			end
 		end
 	-- affichage du ménu permettant à l'admnistrateur de gérer ses emprunts et ses réservations ainsi que ceux des autres autilisateurs
