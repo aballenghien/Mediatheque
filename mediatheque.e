@@ -118,9 +118,10 @@ feature{ANY}
 		do
 			-- Affichage du tableau des utilisateurs
 			if lst.is_equal("USER") then
+				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
-				io.put_string("*    Liste des utilisateurs    *")
+				io.put_string("*    LISTE DES UTILISATEURS    *")
 				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
@@ -135,9 +136,10 @@ feature{ANY}
 			
 			-- Affichage du tableau des livres
 			if lst.is_equal("LIVRE") then
+				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
-				io.put_string("*       Liste des livres       *")
+				io.put_string("*       LISTE DES LIVRES       *")
 				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
@@ -152,9 +154,10 @@ feature{ANY}
 			
 			-- Affichage du tableau des DVD
 			if lst.is_equal("DVD") then
+				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
-				io.put_string("*         Liste des DVD        *")
+				io.put_string("*         LISTE DES DVD        *")
 				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
@@ -169,9 +172,10 @@ feature{ANY}
 			
 			-- Affichage du tableau des acteurs
 			if lst.is_equal("ACTEUR") then
+				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
-				io.put_string("*      Liste des acteurs       *")
+				io.put_string("*      LISTE DES ACTEURS       *")
 				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
@@ -186,9 +190,10 @@ feature{ANY}
 			
 			-- Affichage du tableau des auteurs
 			if lst.is_equal("AUTEUR") then
+				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
-				io.put_string("*       Liste des auteurs      *")
+				io.put_string("*       LISTE DES AUTEURS      *")
 				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
@@ -203,9 +208,10 @@ feature{ANY}
 			
 			-- Affichage du tableau des réalisateurs
 			if lst.is_equal("REALISATEUR") then
+				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
-				io.put_string("*    Liste des réalisateurs    *")
+				io.put_string("*    LISTE DES REALISATEURS    *")
 				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
@@ -220,9 +226,10 @@ feature{ANY}
 			
 			-- Affichage des médias 
 			if lst.is_equal("MEDIA") then
+				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
-				io.put_string("*       Liste des médias       *")
+				io.put_string("*       LISTE DES MEDIAS       *")
 				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
@@ -273,22 +280,24 @@ feature{ANY}
 			io.put_string("%N")
 			io.put_string("1. Consultation")
 			io.put_string("%N")
-			io.put_string("2. Rechercher un média")
+			if utilisateur_connecte.is_admin then
+				io.put_string("2. Rechercher un média (Détail/Emprunt/Modification)")
+			else
+				io.put_string("2. Rechercher un média (Détail/Emprunt)")
+			end
 			io.put_string("%N")
 			io.put_string("3. Gérer mes réservations / mes emprunts")
 			io.put_string("%N")			
 			if utilisateur_connecte.is_admin then
 				io.put_string("4. Consulter la liste des utilisateurs")
 				io.put_string("%N")
-				io.put_string("5. Modifier les informations d'un utilisateur")
+				io.put_string("5. Ajouter un utilisateur")
 				io.put_string("%N")
-				io.put_string("6. Ajouter un utilisateur")
+				io.put_string("6. Ajouter un média")
 				io.put_string("%N")
-				io.put_string("7. Ajouter un média")
+				io.put_string("7. Gérer les réservations et emprunts des utilisateurs")
 				io.put_string("%N")
-				io.put_string("8. Gérer les réservations et emprunts des utilisateurs")
-				io.put_string("%N")
-				io.put_string("9. Déconnexion")
+				io.put_string("8. Déconnexion")
 				io.put_string("%N")
 			else
 				io.put_string("4. Déconnexion")
@@ -319,7 +328,7 @@ feature{ANY}
 					io.put_string("%N")
 				end
 			elseif utilisateur_connecte.is_admin then
-				if choix > 0 and choix < 10 then
+				if choix > 0 and choix < 9 then
 					inspect choix
 					when 1 then
 						afficher_menu_consultation
@@ -331,16 +340,13 @@ feature{ANY}
 						afficher_tableau("USER")
 						io.put_string("%N")
 					when 5 then
-						io.put_string("En cours de développement...")
-						io.put_string("%N")
-					when 6 then
 						gestionnaire_utilisateur.ajouter_utilisateur
 						io.put_string("%N")
-					when 7 then
+					when 6 then
 						gestionnaire_media.ajouter_media
-					when 8 then
+					when 7 then
 						gestionnaire_emprunt_reservation.gerer_emprunts_reservations_admin
-					when 9 then
+					when 8 then
 						io.put_string("Déconnexion")
 						io.put_string("%N")
 						continuer := False
@@ -393,22 +399,16 @@ feature{ANY}
 				inspect choix
 				when 1 then
 					afficher_tableau("MEDIA")
-					io.put_string("%N")
 				when 2 then
 					afficher_tableau("LIVRE")
-					io.put_string("%N")
 				when 3 then
 					afficher_tableau("AUTEUR")
-					io.put_string("%N")
 				when 4 then
 					afficher_tableau("DVD")
-					io.put_string("%N")
 				when 5 then 
 					afficher_tableau("ACTEUR")
-					io.put_string("%N")
 				when 6 then
 					afficher_tableau("REALISATEUR")
-					io.put_string("%N")
 				when 7 then 
 					continuer := afficher_menu
 				else

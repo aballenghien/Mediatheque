@@ -593,63 +593,65 @@ feature{ANY}
 				io.put_string("%N")
 				io.put_string("Nous avons trouvé "+resultat.to_string+" médias correspondants à votre recherche :")
 				io.put_string("%N")
-				afficher_media_choisi
-				io.put_string("%N")
-				correct := False
-				from
-				until correct
-				loop
-					io.put_string("1. Consulter détail")
+				if resultat > 0 then
+					afficher_media_choisi
 					io.put_string("%N")
-					io.put_string("2. Emprunter")
-					io.put_string("%N")
-					if mediatheque.get_utilisateur_connecte.is_admin then
-						io.put_string("3. Modifier")
+					correct := False
+					from
+					until correct
+					loop
+						io.put_string("1. Consulter détail")
 						io.put_string("%N")
-						io.put_string("4. Retour")
+						io.put_string("2. Emprunter")
 						io.put_string("%N")
-					else
-						io.put_string("3. Retour")
-						io.put_string("%N")
-					end
-					
-					io.flush
-					io.read_integer
-					reponse_int := io.last_integer
-					if (reponse_int > 0 and reponse_int < 5 and mediatheque.get_utilisateur_connecte.is_admin)
-						or (reponse_int > 0 and reponse_int < 4 and not mediatheque.get_utilisateur_connecte.is_admin) then
-						correct := True
-						if reponse_int = 1 then
-							io.put_string("Sur quel média voulez vous plus de détails ? (saisissez son numéro) %N")
-							io.flush
-							io.read_integer
-							media := io.last_integer
-							media := media - 1
-							afficher_detail_media(media)
-						end
-						if reponse_int = 2 then 
-							io.put_string("Quel media souhaitez vous emprunter? (saississez son numéro) %N")
-							io.flush
-							io.read_integer
-							media := io.last_integer
-							media := media - 1
-							mediatheque.get_gestionnaire_emprunt_reservation.emprunter_un_media(media)
-						end
-						if reponse_int = 3 and mediatheque.get_utilisateur_connecte.is_admin then 
-							io.put_string("Quel media souhaitez vous modifier ? (saississez son numéro) %N")
-							io.flush
-							io.read_integer
-							media := io.last_integer
-							media := media - 1
-							modifier_media(media)
-						end
-					else
 						if mediatheque.get_utilisateur_connecte.is_admin then
-							io.put_string("Veuillez taper soit 1, 2, 3 ou 4")
+							io.put_string("3. Modifier")
+							io.put_string("%N")
+							io.put_string("4. Retour")
 							io.put_string("%N")
 						else
-							io.put_string("Veuillez taper soit 1, 2 ou 3")
+							io.put_string("3. Retour")
 							io.put_string("%N")
+						end
+					
+						io.flush
+						io.read_integer
+						reponse_int := io.last_integer
+						if (reponse_int > 0 and reponse_int < 5 and mediatheque.get_utilisateur_connecte.is_admin)
+							or (reponse_int > 0 and reponse_int < 4 and not mediatheque.get_utilisateur_connecte.is_admin) then
+							correct := True
+							if reponse_int = 1 then
+								io.put_string("Sur quel média voulez vous plus de détails ? (saisissez son numéro) %N")
+								io.flush
+								io.read_integer
+								media := io.last_integer
+								media := media - 1
+								afficher_detail_media(media)
+							end
+							if reponse_int = 2 then 
+								io.put_string("Quel media souhaitez vous emprunter? (saississez son numéro) %N")
+								io.flush
+								io.read_integer
+								media := io.last_integer
+								media := media - 1
+								mediatheque.get_gestionnaire_emprunt_reservation.emprunter_un_media(media)
+							end
+							if reponse_int = 3 and mediatheque.get_utilisateur_connecte.is_admin then 
+								io.put_string("Quel media souhaitez vous modifier ? (saississez son numéro) %N")
+								io.flush
+								io.read_integer
+								media := io.last_integer
+								media := media - 1
+								modifier_media(media)
+							end
+						else
+							if mediatheque.get_utilisateur_connecte.is_admin then
+								io.put_string("Veuillez taper soit 1, 2, 3 ou 4")
+								io.put_string("%N")
+							else
+								io.put_string("Veuillez taper soit 1, 2 ou 3")
+								io.put_string("%N")
+							end
 						end
 					end
 				end
@@ -1240,7 +1242,7 @@ feature{ANY}
 			until i = mediatheque.get_lst_media_choisis.count
 			loop
 				j := i+1
-				io.put_string("%T "+j.to_string+" -")
+				io.put_string("%T "+j.to_string+". ")
 				io.put_string(mediatheque.get_lst_media_choisis.item(i).to_string)
 				io.put_string("%N")
 				i := i+1
