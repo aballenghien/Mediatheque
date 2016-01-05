@@ -22,8 +22,10 @@ feature{ANY}
 		do
 			if livre/= Void then
 				rst := "%T LIVRE :"+ livre.get_titre
-			else 
-				rst := "%T DVD :" + dvd.get_titre
+			else
+				if dvd /=Void then 
+					rst := "%T DVD :" + dvd.get_titre
+				end
 			end
 			if priorite > 1 then
 				rst.append("%N %T %T Priorité :"+priorite.to_string)

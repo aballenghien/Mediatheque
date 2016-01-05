@@ -1710,7 +1710,7 @@ feature{ANY}
 			end
 			
 			if position_lst_livre > -1 then
-				if livre.get_lst_emprunts.count = 0 then
+				if livre.get_lst_emprunts.count = 0 and livre.get_lst_reservations.count = 0 then
 					supprime := supprimer_livre_fichier(livre)
 					if supprime then
 						mediatheque.get_lst_livres.remove(position_lst_livre)
@@ -1719,10 +1719,10 @@ feature{ANY}
 						io.put_string("Erreur lors de la suppression dans le fichier")
 					end
 				else
-					io.put_string("Le livre ne peut pas être supprimé car il est emprunté %N")
+					io.put_string("Le livre ne peut pas être supprimé car il est emprunté/réservé %N")
 				end
 			elseif position_lst_dvd > -1 then
-				if dvd.get_lst_emprunts.count = 0 then
+				if dvd.get_lst_emprunts.count = 0 and dvd.get_lst_reservations.count = 0 then
 					supprime := supprimer_dvd_fichier(dvd)
 					if supprime then
 						mediatheque.get_lst_dvd.remove(position_lst_dvd)
@@ -1731,7 +1731,7 @@ feature{ANY}
 						io.put_string("Erreur lors de la suppression dans le fichier")
 					end
 				else
-					io.put_string("Le dvd ne peut pas être supprimé car il est emprunté %N")
+					io.put_string("Le dvd ne peut pas être supprimé car il est emprunté/réservé %N")
 				end
 			else
 				io.put_string("Erreur lors de la suppression")
