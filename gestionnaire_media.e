@@ -893,7 +893,7 @@ feature{ANY}
 			ligne, choix : STRING
 			fichier : TEXT_FILE_WRITE
 			dvd : DVD
-			correct : BOOLEAN
+			correct, premier : BOOLEAN
 			indice : INTEGER
 			nb_exemplaires : INTEGER
 			annee : INTEGER
@@ -969,13 +969,17 @@ feature{ANY}
 				-- ajouter des réalisateurs
 				io.put_string("*** Ajout des réalisateurs *** %N")
 				ajout := True
+				premier := True
 				from
 				until not ajout
 				loop
 				    create realisateur.make
 				    io.put_string("Nom ? ")
 				    io.flush
-				    io.read_line
+				    if premier then
+					    io.read_line
+					   	premier := False
+					end
 				    io.read_line
 				    nom.copy(io.last_string)
 				    realisateur.set_nom(nom)
@@ -1316,6 +1320,9 @@ feature{ANY}
 				io.put_string("Nombre d'exemplaire : ")
 				io.put_integer(dvd.get_nombre_exemplaires)
 				io.put_string("%N")
+				if not dvd.get_type.is_empty then
+					io.put_string("Type : Coffret %N")
+				end
 				io.put_string("*** Liste des acteurs ***")
 				io.put_string("%N")
 				from i:= 0
