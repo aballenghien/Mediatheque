@@ -1382,43 +1382,74 @@ feature{ANY}
 	modifier_livre(livre : LIVRE) : LIVRE is
 		local
 			choix : STRING
+			correct : BOOLEAN
 		do
 			choix := ""
 			io.put_string("Titre actuel : "+livre.get_titre+"%N")
-			io.put_string("Modifier titre ? O/N %N")
-			io.flush
-			io.read_line
-			io.read_line
-			choix.copy(io.last_string)
-			if choix.is_equal("O") then
-				io.put_string("Nouveau titre : ")
+			correct := False
+			from
+			until correct
+			loop
+				io.put_string("Modifier titre ? O/N %N")
 				io.flush
 				io.read_line
-				livre.set_titre(io.last_string)
+				io.read_line
+				choix.copy(io.last_string)
+				if choix.is_equal("O") then
+					io.put_string("Nouveau titre : ")
+					io.flush
+					io.read_line
+					livre.set_titre(io.last_string)
+					correct := True
+				elseif choix.is_equal("N") then
+					correct := True
+				else
+					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+				end
 			end
 			io.put_string("Auteur actuel : "+livre.get_auteur.get_nom+" "+livre.get_auteur.get_prenom+"%N")
-			io.put_string("Modifier auteur ? O/N %N")
-			io.flush
-			io.read_line
-			choix.copy(io.last_string)
-			if choix.is_equal("O") then
-				io.put_string("Prénom auteur : ")
+			correct := False
+			from
+			until correct
+			loop
+				io.put_string("Modifier auteur ? O/N %N")
 				io.flush
 				io.read_line
-				livre.get_auteur.set_prenom(io.last_string)
-				io.put_string("Nom auteur : ")
-				io.flush
-				io.read_line
-				livre.get_auteur.set_nom(io.last_string)
+				choix.copy(io.last_string)
+				if choix.is_equal("O") then
+					io.put_string("Prénom auteur : ")
+					io.flush
+					io.read_line
+					livre.get_auteur.set_prenom(io.last_string)
+					io.put_string("Nom auteur : ")
+					io.flush
+					io.read_line
+					livre.get_auteur.set_nom(io.last_string)
+					correct := True
+				elseif choix.is_equal("N") then
+					correct := True
+				else
+					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+				end
 			end
 			io.put_string("Nombre d'exemplaires actuel : "+livre.get_nombre_exemplaires.to_string+"%N")
-			io.put_string("Ajouter un exemplaire ? O/N %N")
-			io.flush
-			io.read_line
-			choix.copy(io.last_string)
-			if choix.is_equal("O") then
-				livre.ajouter_un_exemplaire
-				io.put_string("Nouveau nombre d'exemplaires: "+livre.get_nombre_exemplaires.to_string+"%N")
+			correct := False
+			from
+			until correct
+			loop
+				io.put_string("Ajouter un exemplaire ? O/N %N")
+				io.flush
+				io.read_line
+				choix.copy(io.last_string)
+				if choix.is_equal("O") then
+					livre.ajouter_un_exemplaire
+					io.put_string("Nouveau nombre d'exemplaires: "+livre.get_nombre_exemplaires.to_string+"%N")
+					correct := True
+				elseif choix.is_equal("N") then
+					correct := True
+				else
+					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+				end
 			end
 			Result := livre
 		end
@@ -1426,98 +1457,168 @@ feature{ANY}
 	modifier_dvd(dvd : DVD) : DVD is
 		local
 			choix : STRING
-			continuer : BOOLEAN
+			continuer, correct, correct_a : BOOLEAN
 			acteur : ACTEUR
 			realisateur : REALISATEUR
 		do
 			choix := ""
 			io.put_string("Titre actuel : "+dvd.get_titre+"%N")
-			io.put_string("Modifier titre ? O/N %N")
-			io.flush
-			io.read_line
-			io.read_line
-			choix.copy(io.last_string)
-			if choix.is_equal("O") then
-				io.put_string("Nouveau titre : ")
+			correct := False
+			from
+			until correct
+			loop
+				io.put_string("Modifier titre ? O/N %N")
 				io.flush
 				io.read_line
-				dvd.set_titre(io.last_string)
-			end
-			io.put_string("Nombre d'exemplaires actuel : "+dvd.get_nombre_exemplaires.to_string+"%N")
-			io.put_string("Ajouter un exemplaire ? O/N %N")
-			io.flush
-			io.read_line
-			choix.copy(io.last_string)
-			if choix.is_equal("O") then
-				dvd.ajouter_un_exemplaire
-				io.put_string("Nouveau nombre d'exemplaires: "+dvd.get_nombre_exemplaires.to_string+"%N")
-			end
-			io.put_string("Année de parution actuelle : "+dvd.get_annee.to_string+"%N")
-			io.put_string("Modifier année ? O/N %N")
-			io.flush
-			io.read_line
-			choix.copy(io.last_string)
-			if choix.is_equal("O") then
-				io.put_string("Nouvelle année : ")
-				io.flush
-				io.read_integer
-				dvd.set_annee(io.last_integer)
-			end
-			io.put_string("Ajouter un acteur ? O/N %N")
-			io.flush
-			io.read_line
-			io.read_line
-			choix.copy(io.last_string)
-			if choix.is_equal("O") then
-				continuer := True
-				from
-				until not continuer
-				loop
-					create acteur.make
-					io.put_string("Prénom acteur : ")
+				io.read_line
+				choix.copy(io.last_string)
+				if choix.is_equal("O") then
+					io.put_string("Nouveau titre : ")
 					io.flush
 					io.read_line
-					acteur.set_prenom(io.last_string)
-					io.put_string("Nom acteur : ")
-					io.flush
-					io.read_line
-					acteur.set_nom(io.last_string)
-					dvd.ajouter_acteur(acteur)
-					io.put_string("Ajouter un autre acteur ? O/N%N")
-					io.flush
-					io.read_line
-					choix.copy(io.last_string)
-					if choix.is_equal("N") then
-						continuer := False
-					end
+					dvd.set_titre(io.last_string)
+					correct := True
+				elseif choix.is_equal("N") then
+					correct := True
+				else
+					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
 				end
 			end
-			io.put_string("Ajouter un réalisateur ? O/N %N")
-			io.flush
-			io.read_line
-			choix.copy(io.last_string)
-			if choix.is_equal("O") then
-				continuer := True
-				from
-				until not continuer
-				loop
-					create realisateur.make
-					io.put_string("Prénom réalisateur : ")
+			io.put_string("Nombre d'exemplaires actuel : "+dvd.get_nombre_exemplaires.to_string+"%N")
+			correct := False
+			from
+			until correct
+			loop
+				io.put_string("Ajouter un exemplaire ? O/N %N")
+				io.flush
+				io.read_line
+				choix.copy(io.last_string)
+				if choix.is_equal("O") then
+					dvd.ajouter_un_exemplaire
+					io.put_string("Nouveau nombre d'exemplaires: "+dvd.get_nombre_exemplaires.to_string+"%N")
+					correct := True
+				elseif choix.is_equal("N") then
+					correct := True
+				else
+					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+				end
+			end
+			io.put_string("Année de parution actuelle : "+dvd.get_annee.to_string+"%N")
+			correct := False
+			from
+			until correct
+			loop
+				io.put_string("Modifier année ? O/N %N")
+				io.flush
+				io.read_line
+				choix.copy(io.last_string)
+				if choix.is_equal("O") then
+					io.put_string("Nouvelle année : ")
 					io.flush
-					io.read_line
-					realisateur.set_prenom(io.last_string)
-					io.put_string("Nom réalisateur : ")
-					io.flush
-					io.read_line
-					realisateur.set_nom(io.last_string)
-					dvd.ajouter_realisateur(realisateur)
-					io.put_string("Ajouter un autre réalisateur ? O/N%N")
-					io.flush
-					io.read_line
-					choix.copy(io.last_string)
-					if choix.is_equal("N") then
-						continuer := False
+					io.read_integer
+					dvd.set_annee(io.last_integer)
+					correct := True
+				elseif choix.is_equal("N") then
+					correct := True
+				else
+					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+				end
+			end
+			correct := False
+			from
+			until correct
+			loop
+				io.put_string("Ajouter un acteur ? O/N %N")
+				io.flush
+				io.read_line
+				io.read_line
+				choix.copy(io.last_string)
+				if choix.is_equal("O") then
+					continuer := True
+					from
+					until not continuer
+					loop
+						create acteur.make
+						io.put_string("Prénom acteur : ")
+						io.flush
+						io.read_line
+						acteur.set_prenom(io.last_string)
+						io.put_string("Nom acteur : ")
+						io.flush
+						io.read_line
+						acteur.set_nom(io.last_string)
+						dvd.ajouter_acteur(acteur)
+						correct_a := False
+						from
+						until correct_a
+						loop
+							io.put_string("Ajouter un autre acteur ? O/N%N")
+							io.flush
+							io.read_line
+							choix.copy(io.last_string)
+							if choix.is_equal("N") then
+								continuer := False
+								correct_a := True
+							elseif choix.is_equal("O") then
+								correct_a := True
+							else 
+								io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+							end
+						end
 					end
+					correct := True
+				elseif choix.is_equal("N") then
+					correct := True
+				else
+					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+				end
+			end
+			correct := False
+			from
+			until correct
+			loop
+				io.put_string("Ajouter un réalisateur ? O/N %N")
+				io.flush
+				io.read_line
+				choix.copy(io.last_string)
+				if choix.is_equal("O") then
+					continuer := True
+					from
+					until not continuer
+					loop
+						create realisateur.make
+						io.put_string("Prénom réalisateur : ")
+						io.flush
+						io.read_line
+						realisateur.set_prenom(io.last_string)
+						io.put_string("Nom réalisateur : ")
+						io.flush
+						io.read_line
+						realisateur.set_nom(io.last_string)
+						dvd.ajouter_realisateur(realisateur)
+						correct_a := False
+						from
+						until correct_a
+						loop
+							io.put_string("Ajouter un autre réalisateur ? O/N%N")
+							io.flush
+							io.read_line
+							choix.copy(io.last_string)
+							if choix.is_equal("N") then
+								continuer := False
+								correct_a := True
+							elseif choix.is_equal("O") then
+								correct_a := True
+							else 
+								io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
+							end
+						end
+					end
+					correct := True
+				elseif choix.is_equal("N") then
+					correct := True
+				else
+					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
 				end
 			end
 			Result := dvd
