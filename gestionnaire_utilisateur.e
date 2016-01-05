@@ -355,8 +355,10 @@ feature{ANY}
 		local
 			choix : STRING
 			correct : BOOLEAN
+			mod : BOOLEAN
 		do
 			choix := ""
+			mod := modifier
 			if not modifier then
 				io.put_string("%N")
 				io.put_string("*********************************")
@@ -373,7 +375,8 @@ feature{ANY}
 			loop
 				io.put_string("Modifier nom ? (O/N) %N")
 				io.flush
-				if not modifier then
+				if not mod then
+					mod:= True
 					io.read_line
 				end
 				io.read_line
