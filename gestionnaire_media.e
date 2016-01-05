@@ -607,7 +607,9 @@ feature{ANY}
 						if mediatheque.get_utilisateur_connecte.is_admin then
 							io.put_string("3. Modifier")
 							io.put_string("%N")
-							io.put_string("4. Retour")
+							io.put_string("4. Supprimer un media")
+							io.put_string("%N")
+							io.put_string("5. Retour")
 							io.put_string("%N")
 						else
 							io.put_string("3. Retour")
@@ -644,9 +646,17 @@ feature{ANY}
 								media := media - 1
 								modifier_media(media)
 							end
+							if reponse_int = 3 and mediatheque.get_utilisateur_connecte.is_admin then 
+								io.put_string("Quel media souhaitez vous supprimer ? (saississez son numéro) %N")
+								io.flush
+								io.read_integer
+								media := io.last_integer
+								media := media - 1
+								supprimer_media(media)
+							end
 						else
 							if mediatheque.get_utilisateur_connecte.is_admin then
-								io.put_string("Veuillez taper soit 1, 2, 3 ou 4")
+								io.put_string("Veuillez taper soit 1, 2, 3, 4 ou 5")
 								io.put_string("%N")
 							else
 								io.put_string("Veuillez taper soit 1, 2 ou 3")
@@ -1550,6 +1560,66 @@ feature{ANY}
 			end
 			Result := position
 		end
+		
+	supprimer_media(choix_media : INTEGER) is
+		local
+			livre : LIVRE
+			dvd : DVD
+			i,j : INTEGER
+			position_lst_livre : INTEGER
+			position_lst_dvd : INTEGER
+			
+		do
+			position_lst_livre := -1
+			position_lst_dvd := -1
+			from i:= 0
+			until i = mediatheque.get_lst_media_choisis.count
+			loop
+				if i = choix_media then
+					if mediatheque.get_lst_media_choisis.item(i).to_string.has_substring("LIVRE") then
+						from j:= 0
+						until j = mediatheque.get_lst_livres.count
+						loop
+							if mediatheque.get_lst_livres.item(j).get_titre = mediatheque.get_lst_media_choisis.item(i).get_titre then
+								livre := mediatheque.get_lst_livres.item(j)
+								position_lst_livre := j
+							end
+							j := j+1
+						end
+					else 
+						from j:= 0
+						until j = mediatheque.get_lst_dvd.count
+						loop
+							if mediatheque.get_lst_dvd.item(j).get_titre = mediatheque.get_lst_media_choisis.item(i).get_titre then
+								dvd := mediatheque.get_lst_dvd.item(j)
+								position_lst_dvd := j
+							end
+							j := j+1
+						end
+					end
+				end
+				i := i+1
+			end
+			
+			if position_lst_livre > -1 then
+				if livre.get_lst_emprunt.count = 0 then
+					mediatheque.get_lst_livres.remove(position_lst_livre)
+					io.put_string("Le livre a été supprimé %N")
+				else
+					io.put_string("Le livre ne peut pas être supprimé car il est emprunté %N")
+				end
+			elseif position_lst_dvd > -1 then
+				if dvd.get_lst_emprunt.count = 0 then
+					mediatheque.get_lst_dvd.remove(position_lst_dvd)
+					io.put_string("Le dvd a été supprimé %N")
+				else
+					io.put_string("Le dvd ne peut pas être supprimé car il est emprunté %N")
+				end
+			else
+				io.put_string("Erreur lors de la suppression")
+			end
+		end
+			
 	
 	
 end
