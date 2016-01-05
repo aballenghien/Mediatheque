@@ -619,7 +619,7 @@ feature{ANY}
 						io.flush
 						io.read_integer
 						reponse_int := io.last_integer
-						if (reponse_int > 0 and reponse_int < 5 and mediatheque.get_utilisateur_connecte.is_admin)
+						if (reponse_int > 0 and reponse_int < 6 and mediatheque.get_utilisateur_connecte.is_admin)
 							or (reponse_int > 0 and reponse_int < 4 and not mediatheque.get_utilisateur_connecte.is_admin) then
 							correct := True
 							if reponse_int = 1 then
@@ -646,7 +646,7 @@ feature{ANY}
 								media := media - 1
 								modifier_media(media)
 							end
-							if reponse_int = 3 and mediatheque.get_utilisateur_connecte.is_admin then 
+							if reponse_int = 4 and mediatheque.get_utilisateur_connecte.is_admin then 
 								io.put_string("Quel media souhaitez vous supprimer ? (saississez son numéro) %N")
 								io.flush
 								io.read_integer
@@ -1669,6 +1669,7 @@ feature{ANY}
 			i,j : INTEGER
 			position_lst_livre : INTEGER
 			position_lst_dvd : INTEGER
+			supprime : BOOLEAN
 			
 		do
 			position_lst_livre := -1
@@ -1703,22 +1704,181 @@ feature{ANY}
 			end
 			
 			if position_lst_livre > -1 then
-				if livre.get_lst_emprunt.count = 0 then
-					mediatheque.get_lst_livres.remove(position_lst_livre)
-					io.put_string("Le livre a été supprimé %N")
+				if livre.get_lst_emprunts.count = 0 then
+					supprime := supprimer_livre_fichier(livre)
+					if supprime then
+						mediatheque.get_lst_livres.remove(position_lst_livre)
+						io.put_string("Le livre a été supprimé %N")
+					else
+						io.put_string("Erreur lors de la suppression dans le fichier")
+					end
 				else
 					io.put_string("Le livre ne peut pas être supprimé car il est emprunté %N")
 				end
 			elseif position_lst_dvd > -1 then
-				if dvd.get_lst_emprunt.count = 0 then
-					mediatheque.get_lst_dvd.remove(position_lst_dvd)
-					io.put_string("Le dvd a été supprimé %N")
+				if dvd.get_lst_emprunts.count = 0 then
+					supprime := supprimer_dvd_fichier(dvd)
+					if supprime then
+						mediatheque.get_lst_dvd.remove(position_lst_dvd)
+						io.put_string("Le dvd a été supprimé %N")
+					else
+						io.put_string("Erreur lors de la suppression dans le fichier")
+					end
 				else
 					io.put_string("Le dvd ne peut pas être supprimé car il est emprunté %N")
 				end
 			else
 				io.put_string("Erreur lors de la suppression")
 			end
+		end
+		
+		
+	supprimer_livre_fichier(livre : LIVRE) : BOOLEAN is
+		local
+			fichier_r1 : TEXT_FILE_READ
+			fichier_r2 : TEXT_FILE_READ
+			fichier_w1 : TEXT_FILE_WRITE
+			fichier_w2 : TEXT_FILE_WRITE
+			tableau_media : ARRAY[STRING]
+			ligne : STRING
+			supprime : BOOLEAN
+			i : INTEGER
+		do
+			supprime := False
+			create fichier_r1.make
+			fichier_r1.connect_to("medias.txt")
+			if fichier_r1.is_connected then
+				create tableau_media.with_capacity(1,0)
+				from
+				until fichier_r1.end_of_input
+				loop
+					fichier_r1.read_line_in(ligne)
+					if ligne.has_substring(livre.get_titre) and ligne.has_substring(livre.get_auteur.get_nom) 
+						and ligne.has_substring(livre.get_auteur.get_prenom) then
+						supprime := True
+					else
+						tableau_media.add_last(ligne)
+					end
+				end
+				fichier_r1.disconnect
+				if supprime then
+					create fichier_w1.make
+					fichier_w1.connect_to("medias.txt")
+					from i:= 0
+					until i = tableau_media.count
+					loop
+						fichier_w1.put_line(tableau_media.item(i))
+						i:= i+1
+					end
+					fichier_w1.disconnect
+				end			
+			end
+			if not supprime then
+				create fichier_r2.make
+				fichier_r2.connect_to("medias2.txt")
+				if fichier_r2.is_connected then
+					create tableau_media.with_capacity(1,0)
+					from
+					until fichier_r2.end_of_input
+					loop
+						fichier_r2.read_line_in(ligne)
+						if ligne.has_substring(livre.get_titre) and ligne.has_substring(livre.get_auteur.get_nom) 
+							and ligne.has_substring(livre.get_auteur.get_prenom) then
+							supprime := True
+						else
+							tableau_media.add_last(ligne)
+						end
+					end
+					fichier_r2.disconnect
+					if supprime then
+						create fichier_w2.make
+						fichier_w2.connect_to("medias2.txt")
+						from i:= 0
+						until i = tableau_media.count
+						loop
+							fichier_w2.put_line(tableau_media.item(i))
+							i:= i+1
+						end
+						fichier_w2.disconnect
+					end			
+				end
+			end
+			Result := supprime
+		end
+		
+		supprimer_dvd_fichier(dvd : DVD) : BOOLEAN is
+		local
+			fichier_r1 : TEXT_FILE_READ
+			fichier_r2 : TEXT_FILE_READ
+			fichier_w1 : TEXT_FILE_WRITE
+			fichier_w2 : TEXT_FILE_WRITE
+			tableau_media : ARRAY[STRING]
+			ligne : STRING
+			supprime : BOOLEAN
+			i : INTEGER
+		do
+			supprime := False
+			create fichier_r1.make
+			fichier_r1.connect_to("medias.txt")
+			if fichier_r1.is_connected then
+				create tableau_media.with_capacity(1,0)
+				from
+				until fichier_r1.end_of_input
+				loop
+					ligne := ""
+					fichier_r1.read_line_in(ligne)
+					if ligne.has_substring(dvd.get_titre) and ligne.has_substring(dvd.get_lst_realisateurs.item(0).get_nom) 
+						and ligne.has_substring(dvd.get_lst_realisateurs.item(0).get_prenom) then
+						supprime := True
+					else
+						tableau_media.add_last(ligne)
+					end
+				end
+				fichier_r1.disconnect
+				if supprime then
+					create fichier_w1.make
+					fichier_w1.connect_to("medias.txt")
+					from i:= 0
+					until i = tableau_media.count
+					loop
+						fichier_w2.put_line(tableau_media.item(i))
+						i:= i+1
+					end
+					fichier_w1.disconnect
+				end			
+			end
+			if not supprime then
+				create fichier_r2.make
+				fichier_r2.connect_to("medias2.txt")
+				if fichier_r2.is_connected then
+					create tableau_media.with_capacity(1,0)
+					from
+					until fichier_r2.end_of_input
+					loop
+						ligne := ""
+						fichier_r2.read_line_in(ligne)
+						if ligne.has_substring(dvd.get_titre) and ligne.has_substring(dvd.get_lst_realisateurs.item(0).get_nom) 
+							and ligne.has_substring(dvd.get_lst_realisateurs.item(0).get_prenom) then
+							supprime := True
+						else
+							tableau_media.add_last(ligne)
+						end
+					end
+					fichier_r2.disconnect
+					if supprime then
+						create fichier_w2.make
+						fichier_w2.connect_to("medias2.txt")
+						from i:= 0
+						until i = tableau_media.count
+						loop
+							fichier_w2.put_line(tableau_media.item(i))
+							i:= i+1
+						end
+						fichier_w2.disconnect
+					end			
+				end
+			end
+			Result := supprime
 		end
 			
 	
