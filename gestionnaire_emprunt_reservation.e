@@ -690,10 +690,10 @@ feature{ANY}
 						correct := True
 						-- suppression de la réservation dans le fichier						
 						supprimer_reservation_fichier(mediatheque.get_utilisateur_connecte.get_lst_reservations.item(choix-1))
-						-- suppression de la réservation dans la liste de l'utilisateur
-						mediatheque.get_utilisateur_connecte.get_lst_reservations.remove(choix-1)
 						-- la réservation est dissocié du média dans la liste
 						supprimer_reservation_liste_medias(mediatheque.get_utilisateur_connecte.get_lst_reservations.item(choix-1))
+						-- suppression de la réservation dans la liste de l'utilisateur
+						mediatheque.get_utilisateur_connecte.get_lst_reservations.remove(choix-1)
 						io.put_string("Réservation annulée %N")
 					end
 				end
@@ -855,10 +855,10 @@ feature{ANY}
 							if choix > 0 and choix <= i then
 								--suppression de la réservation dans le fichier des réservations
 								supprimer_reservation_fichier(utilisateur.get_lst_reservations.item(choix-1))
-								-- suppression de la réservation dans la liste de l'utilisateur concerné
-								utilisateur.get_lst_reservations.remove(choix-1)
 								-- suppression de la réservation pour le média concerné
 								supprimer_reservation_liste_medias(utilisateur.get_lst_reservations.item(choix-1))
+								-- suppression de la réservation dans la liste de l'utilisateur concerné
+								utilisateur.get_lst_reservations.remove(choix-1)
 								correct := True
 								io.flush
 								io.put_string("Réservation annulée ! %N")
