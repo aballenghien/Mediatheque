@@ -920,6 +920,7 @@ feature{ANY}
 			compteur : INTEGER
 			choix : INTEGER
 			identifiant : STRING
+			ajouter_ds_media : STRING
 		do
 			io.put_string("%N")
 			io.put_string("********************************")
@@ -935,7 +936,9 @@ feature{ANY}
 			loop
 				io.put_string("Identifiant de l'utilisateur : %N")
 				io.flush
-				io.read_line
+				if compteur = 1 then
+					io.read_line
+				end
 				io.read_line
 				identifiant := io.last_string
 				from i := 0
@@ -988,19 +991,25 @@ feature{ANY}
 							else
 								emprunt.set_livre(reservation.get_livre)
 							end
-							ajouter_emprunt_liste_medias(emprunt)
-							ajout := utilisateur.ajouter_emprunt(emprunt)
-							if not ajout then
-								io.put_string("L'utilisateur ne peut pas emprunter plus %N")
+							ajouter_ds_media := ajouter_emprunt_liste_medias(emprunt)
+							if ajouter_ds_media.is_equal("FAIT") then
+								io.put_string("L'utilisateur emprunte déjà ce média")
+							elseif ajouter_ds_media.is_equal("NON") then
+								io.put_string("Le média n'est pas disponible pour l'emprunt")
 							else
-								supprimer_reservation_fichier(reservation)
-								utilisateur.get_lst_reservations.remove(choix-1)
-								supprimer_reservation_liste_medias(reservation)
-								create fichier_emprunt.make
-								fichier_emprunt.connect_for_appending_to("emprunts.txt")
-								fichier_emprunt.put_line(emprunt.format_enregistrement)
-								fichier_emprunt.disconnect
-								io.put_string("Emprunt réalisé ! %N")
+							ajout := utilisateur.ajouter_emprunt(emprunt)
+								if not ajout then
+									io.put_string("L'utilisateur ne peut pas emprunter plus %N")
+								else
+									supprimer_reservation_fichier(reservation)
+									utilisateur.get_lst_reservations.remove(choix-1)
+									supprimer_reservation_liste_medias(reservation)
+									create fichier_emprunt.make
+									fichier_emprunt.connect_for_appending_to("emprunts.txt")
+									fichier_emprunt.put_line(emprunt.format_enregistrement)
+									fichier_emprunt.disconnect
+									io.put_string("Emprunt réalisé ! %N")
+								end
 							end
 						else
 							io.put_string("Le média n'existe pas %N")
@@ -1103,11 +1112,12 @@ feature{ANY}
 		end
 	
 	-- ajout du nouvel emprunt associé au média
-	ajouter_emprunt_liste_medias (emprunt : EMPRUNT) is
+	ajouter_emprunt_liste_medias (emprunt : EMPRUNT): STRING is
 		local
 			i : INTEGER
 			ajouter : STRING
 		do
+			ajouter := ""
 			if emprunt.get_dvd /= Void then
 				from i := 0
 				until i = mediatheque.get_lst_dvd.count
@@ -1127,6 +1137,7 @@ feature{ANY}
 					i := i+1
 				end 
 			end
+			Result := ajouter
 		end
 		
 	-- affiche la liste des utilisateurs ayant effctué une réservation ainsi que leurs réservations
