@@ -389,7 +389,7 @@ feature{ANY}
 				un_emprunt.set_numero(generer_numero)
 				ajouter_ds_media := livre.ajouter_emprunt(un_emprunt)
 				-- ajouter_emprunt retourne NON si le média n'est pas disponible à l'emprunt
-				if ajouter_ds_media = "NON" then
+				if ajouter_ds_media.is_equal("NON") then
 					correct := False
 					from
 					until correct
