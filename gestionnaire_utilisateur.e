@@ -134,7 +134,7 @@ feature{ANY}
 			end
 		end
 	
-		
+	-- ajout un utilisateur
 	ajouter_utilisateur is
 		local
 			nom, prenom, identifiant, admin, ligne, essai : STRING
@@ -165,14 +165,13 @@ feature{ANY}
 			from nb_essai := 0
 			until id_ok or nb_essai = 3
 			loop
+			    -- identifiant
 				id_ok := True
 				io.put_string("Identifiant de l'utilisateur ? ")
 				io.flush
 				io.read_line
-				if nb_essai = 0 then
-					io.read_line
-				end
 				identifiant.copy(io.last_string)
+				-- on vérifie qu'il n'existe pas déjà
 				from i:= 0
 				until i = mediatheque.get_lst_users.count
 				loop
@@ -182,6 +181,7 @@ feature{ANY}
 					i := i+1
 				end
 				
+				-- l'utilisateur à 3 essai pour rentrer un identifiant valide
 				if not id_ok then
 					correct := False
 					nb_essai := nb_essai + 1
@@ -214,15 +214,18 @@ feature{ANY}
 			end
 			
 			if id_ok = True then
+			    -- nom
 				io.put_string("Nom de l'utilisateur ? ")
 				io.flush
 				io.read_line
 				nom.copy(io.last_string)
+				-- prenom
 				io.put_string("Prénom de l'utilisateur ? ")
 				io.flush
 				io.read_line
 				prenom.copy(io.last_string)
-
+                
+                -- administrateur ou non
 				from 
 				until admin_ok
 				loop
@@ -237,17 +240,20 @@ feature{ANY}
 						admin_ok := False
 					end
 				end
-			
+				
+				-- formattage de la ligne pour l'écriture dans le fichier			
 				ligne.append("Nom<"+nom+"> ; Prenom<"+prenom+"> ; Identifiant<"+identifiant+">")
 				if admin.is_equal("O") then
 					ligne.append(" ; Admin<OUI>")
 				end
 			
+			    -- écriture dans le fichier
 				create fichier.make
 				fichier.connect_for_appending_to("utilisateurs2.txt")
 				fichier.put_line(ligne)
 				fichier.disconnect
 			
+			    -- création de l'utilisateur
 				create utilisateur.make
 				utilisateur.set_nom(nom)
 				utilisateur.set_prenom(prenom)
@@ -256,6 +262,7 @@ feature{ANY}
 				if admin.is_equal("O") then
 					utilisateur.set_admin(True)
 				end
+				-- ajout dans la liste
 				mediatheque.get_lst_users.add_last(utilisateur)
 			
 				io.put_string("Nouvel utilisateur ajouté ! ")
@@ -264,12 +271,14 @@ feature{ANY}
 			end
 		end
 		
+	-- affiche les informations du compte
 	afficher_info_compte(user : UTILISATEUR) is
 		local
-			choix : INTEGER
+			choix : STRING
 			correct : BOOLEAN
 		do
 			correct := False
+			choix := ""
 			io.put_string("%N")
 			io.put_string("********************************")
 			io.put_string("%N")
@@ -285,22 +294,27 @@ feature{ANY}
 				io.put_string("1. Modifier information%N")
 				io.put_string("2. Retour%N")
 				io.flush
-				io.read_integer
-				choix := io.last_integer
-				if choix = 1 then
-					correct := True
-					modifier_utilisateur(user, False)
-				elseif choix = 2 then
-					correct := True
+				io.read_line
+				choix.copy(io.last_string)
+				if choix.is_integer then
+				    if choix.to_integer = 1 then
+					    correct := True
+					    modifier_utilisateur(user, False)
+				    elseif choix.to_integer = 2 then
+					    correct := True
+				    end
+				else
+					io.put_string("Tapez 1 ou 2%N")
 				end
 			end			
 		end
 		
+	-- modifier utilisateur
 	modifier_un_utilisateur is
 		local
 			identifiant, choix : STRING
 			user : UTILISATEUR
-			id_ok, correct, premier : BOOLEAN
+			id_ok, correct : BOOLEAN
 		do
 			io.put_string("%N")
 			io.put_string("********************************")
@@ -310,24 +324,23 @@ feature{ANY}
 			io.put_string("********************************")
 			io.put_string("%N")
 			identifiant := ""	
-			choix := ""		
-			premier := True
+			choix := ""
 			id_ok := False
 			from
 			until id_ok
 			loop
+			    -- id de l'utilisateur à modifier
 				io.put_string("Identifiant de l'utilisateur à modifier ?%N")
 				io.flush
-				if premier then
-					io.read_line
-					premier := False
-				end
 				io.read_line
 				identifiant.copy(io.last_string)
+				-- on recherche l'utilisateur
 				user := rechercher_utilisateur(identifiant)
+				-- s'il existe on appelle la fonction de modification
 				if user /= Void then
 					id_ok := True
 					modifier_utilisateur(user, True)	
+				-- s'il n'existe pas, on propose de réessayer
 				else
 					correct := False
 					from
@@ -351,6 +364,7 @@ feature{ANY}
 			end							
 		end
 	
+	-- modifier utilisateur
 	modifier_utilisateur(user : UTILISATEUR; modifier : BOOLEAN) is
 		local
 			choix : STRING
@@ -368,6 +382,7 @@ feature{ANY}
 				io.put_string("*********************************")
 				io.put_string("%N")
 			end
+			-- modification du nom
 			io.put_string("Nom actuel : "+user.get_nom+"%N")
 			correct := False
 			from
@@ -375,10 +390,6 @@ feature{ANY}
 			loop
 				io.put_string("Modifier nom ? (O/N) %N")
 				io.flush
-				if not mod then
-					mod:= True
-					io.read_line
-				end
 				io.read_line
 				choix.copy(io.last_string)
 				if choix.is_equal("O") then
@@ -394,6 +405,7 @@ feature{ANY}
 				end
 			end
 			
+			-- modification du prenom
 			io.put_string("Prénom actuel : "+user.get_prenom+"%N")
 			correct := False
 			from
@@ -416,6 +428,7 @@ feature{ANY}
 				end
 			end
 			
+			-- si l'utilisateur connecté est un administrateur, il peut changer le type de l'utilisateur
 			if mediatheque.get_utilisateur_connecte.is_admin then
 				correct := False
 				if user.is_admin then
@@ -458,11 +471,12 @@ feature{ANY}
 			end
 		end
 		
+	-- fonction de recherche d'un utilisateur
 	rechercher is
 		local
 			identifiant, choix : STRING
 			user : UTILISATEUR
-			id_ok, correct, premier : BOOLEAN
+			id_ok, correct : BOOLEAN
 		do
 			io.put_string("%N")
 			io.put_string("********************************")
@@ -472,18 +486,14 @@ feature{ANY}
 			io.put_string("********************************")
 			io.put_string("%N")
 			identifiant := ""	
-			choix := ""		
-			premier := True
+			choix := ""
 			id_ok := False
 			from
 			until id_ok
 			loop
+			    -- saisie de l'identifiant
 				io.put_string("Identifiant de l'utilisateur à rechercher ?%N")
 				io.flush
-				if premier then
-					io.read_line
-					premier := False
-				end
 				io.read_line
 				identifiant.copy(io.last_string)
 				user := rechercher_utilisateur(identifiant)

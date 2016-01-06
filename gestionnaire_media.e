@@ -406,23 +406,27 @@ feature{ANY}
 	-- fonction recherchant un média dans la liste des médias
 	rechercher_media is
 		local
-			choix : INTEGER
+			choix : STRING
 			reponse: STRING
 			correct : BOOLEAN
 			scorrect : BOOLEAN
+			surcorrect : BOOLEAN
 			resultat : INTEGER
 			type : STRING
 			retour : BOOLEAN
-			reponse_int : INTEGER
-			media : INTEGER
+			reponse_str : STRING
+			media : STRING
+			media_int : INTEGER
 		do
 			correct := False
+			surcorrect := False
 			retour := False
-			choix := 0
+			choix := ""
 			reponse := ""
-			reponse_int := 0
+			reponse_str := ""
 			resultat := 0
-			media := 0
+			media := ""
+			media_int := 0
 			
 			from
 			until correct
@@ -445,144 +449,156 @@ feature{ANY}
 				io.put_string("7. Retour")
 				io.put_string("%N")	
 	
-				io.flush
-				io.read_integer
-				choix := io.last_integer
-
-				if choix > 0 and choix < 9 then
-					correct :=True
-					inspect choix
-					-- Pour le choix 1, recherche par type
-					when 1 then
-						scorrect := False
-						from 
-						until scorrect
-						loop
-							io.put_string("Vous recherchez : 1: Un DVD, 2: Un Livre ?")
-							io.put_string("%N")
-							io.flush
-							io.read_integer
-							reponse_int := io.last_integer
-							if reponse_int = 1 then
-								scorrect := True
-								type := "DVD"
-							end
-							if reponse_int = 2 then
-								scorrect := True
-								type := "LIVRE"
-							end
-						end
-						resultat := rechercher_media_par_type(type)
+				from 
+				until surcorrect
+				loop
+					io.flush
+					io.read_line
+					choix.copy(io.last_string)
+					if choix.is_integer then
+						surcorrect := True
+						if choix.to_integer > 0 and choix.to_integer < 9 then
+							correct :=True
+							inspect choix.to_integer
+							-- Pour le choix 1, recherche par type
+							when 1 then
+								scorrect := False
+								from 
+								until scorrect
+								loop
+									io.put_string("Vous recherchez : 1: Un DVD, 2: Un Livre ?")
+									io.put_string("%N")
+									io.flush
+									io.read_line
+									reponse_str.copy(io.last_string)
+									if reponse_str.is_integer then
+										if reponse_str.to_integer = 1 then
+											scorrect := True
+											type := "DVD"
+										end
+										if reponse_str.to_integer = 2 then
+											scorrect := True
+											type := "LIVRE"
+										end
+									end
+								end
+								resultat := rechercher_media_par_type(type)
 						
-					-- Choix 2, recherche par titre (DVD et livre)
-					when 2 then
-						io.put_string("Donnez le titre ou une partie du titre:")
-						io.put_string("%N")
-						io.flush
-						io.read_line
-						io.read_line
-						reponse.copy(io.last_string)
-						resultat := rechercher_media_par_titre(reponse)
-
-					-- choix 3, recherche par acteur
-					when 3 then
-						io.put_string("Donnez le nom et/ou le prenom de l'acteur (au format nom/prenom)")
-						io.put_string("%N")
-						io.flush
-						io.read_line
-						io.read_line
-						reponse.copy(io.last_string)
-						scorrect := False
-						from
-						until scorrect
-						loop
-							if reponse.has_substring("/") then
-								scorrect := True
-							else
-								io.put_string("Le format est nom/prenom")
+							-- Choix 2, recherche par titre (DVD et livre)
+							when 2 then
+								io.put_string("Donnez le titre ou une partie du titre:")
 								io.put_string("%N")
 								io.flush
 								io.read_line
 								reponse.copy(io.last_string)
-							end
-						end	
-						resultat := rechercher_media_par_personne("ACTEUR",reponse)
+								resultat := rechercher_media_par_titre(reponse)
 
-					-- choix 4, recherche par auteur
-					when 4 then
-						io.put_string("Donnez le nom et/ou le prenom de l'auteur (au format nom/prenom)")
-						io.put_string("%N")
-						io.flush
-						io.read_line
-						io.read_line
-						reponse.copy(io.last_string)
-						scorrect := False
-						from
-						until scorrect
-						loop
-							if reponse.has_substring("/") then
-								scorrect := True
-							else
-								io.put_string("Le format est nom/prenom")
+							-- choix 3, recherche par acteur
+							when 3 then
+								io.put_string("Donnez le nom et/ou le prenom de l'acteur (au format nom/prenom)")
 								io.put_string("%N")
 								io.flush
 								io.read_line
 								reponse.copy(io.last_string)
-							end
-						end	
-						resultat := rechercher_media_par_personne("AUTEUR",reponse)
+								scorrect := False
+								from
+								until scorrect
+								loop
+									if reponse.has_substring("/") then
+										scorrect := True
+									else
+										io.put_string("Le format est nom/prenom")
+										io.put_string("%N")
+										io.flush
+										io.read_line
+										reponse.copy(io.last_string)
+									end
+								end	
+								resultat := rechercher_media_par_personne("ACTEUR",reponse)
 
-					-- choix 5, recherche par réalisateur
-					when 5 then
-						io.put_string("Donnez le nom et/ou le prenom du réalisateur (au format nom/prenom)")
-						io.put_string("%N")
-						io.flush
-						io.read_line
-						io.read_line
-						reponse.copy(io.last_string)
-						scorrect := False
-						from
-						until scorrect
-						loop
-							if reponse.has_substring("/") then
-								scorrect := True
-							else
-								io.put_string("Le format est nom/prenom")
+							-- choix 4, recherche par auteur
+							when 4 then
+								io.put_string("Donnez le nom et/ou le prenom de l'auteur (au format nom/prenom)")
 								io.put_string("%N")
 								io.flush
 								io.read_line
 								reponse.copy(io.last_string)
-							end
-						end	
-						resultat := rechercher_media_par_personne("REALISATEUR",reponse)
+								scorrect := False
+								from
+								until scorrect
+								loop
+									if reponse.has_substring("/") then
+										scorrect := True
+									else
+										io.put_string("Le format est nom/prenom")
+										io.put_string("%N")
+										io.flush
+										io.read_line
+										reponse.copy(io.last_string)
+									end
+								end	
+								resultat := rechercher_media_par_personne("AUTEUR",reponse)
 
-					-- choix6 ,recherche par année
-					when 6 then
-						from
-						until scorrect
-						loop
-							io.put_string("En quel année est sortie le DVD ?")
-							io.put_string("%N")
-							io.flush
-							io.read_integer
-							reponse_int := io.last_integer
-							if reponse_int > 1000 and reponse_int < 9999 then
-								scorrect := True
-							else
-								io.put_string("Donnez une année sur quatres chiffres")
+							-- choix 5, recherche par réalisateur
+							when 5 then
+								io.put_string("Donnez le nom et/ou le prenom du réalisateur (au format nom/prenom)")
 								io.put_string("%N")
-							end
-						end
-						resultat := rechercher_media_par_annee(reponse_int)
+								io.flush
+								io.read_line
+								reponse.copy(io.last_string)
+								scorrect := False
+								from
+								until scorrect
+								loop
+									if reponse.has_substring("/") then
+										scorrect := True
+									else
+										io.put_string("Le format est nom/prenom")
+										io.put_string("%N")
+										io.flush
+										io.read_line
+										reponse.copy(io.last_string)
+									end
+								end	
+								resultat := rechercher_media_par_personne("REALISATEUR",reponse)
+
+							-- choix6 ,recherche par année
+							when 6 then
+								from
+								until scorrect
+								loop
+									io.put_string("En quel année est sortie le DVD ?")
+									io.put_string("%N")
+									io.flush
+									io.read_line
+									reponse_str.copy(io.last_string)
+									if reponse_str.is_integer then
+										if reponse_str.to_integer > 1000 and reponse_str.to_integer < 9999 then
+											scorrect := True
+										else
+											io.put_string("Donnez une année sur quatres chiffres")
+											io.put_string("%N")
+										end
+									else
+										io.put_string("Donnez une année sur quatres chiffres")
+										io.put_string("%N")
+									end
+								end
+								resultat := rechercher_media_par_annee(reponse_str.to_integer)
 						
-					when 7 then
-						retour := True	
+							when 7 then
+								retour := True	
+							end
+						else
+							io.put_string("Veuillez choisir un chiffre entre 1 et 7")
+							io.put_string("%N")
+						end
+					else
+						io.put_string("Tapez un nombre%N")
 					end
-				else
-					io.put_string("Veuillez choisir un chiffre entre 1 et 7")
-					io.put_string("%N")
 				end
 			end
+			-- affichage des resultats de la recherche
 			if retour = False then
 				io.put_string("%N")
 				io.put_string("********************************")
@@ -591,12 +607,16 @@ feature{ANY}
 				io.put_string("%N")
 				io.put_string("********************************")
 				io.put_string("%N")
+				-- affichage du nombre de média trouvé
 				io.put_string("Nous avons trouvé "+resultat.to_string+" médias correspondants à votre recherche :")
 				io.put_string("%N")
+				-- s'il y a un média trouvé
 				if resultat > 0 then
+				    -- affichage de la liste des médias trouvé
 					afficher_media_choisi
 					io.put_string("%N")
 					correct := False
+					-- menu
 					from
 					until correct
 					loop
@@ -615,54 +635,83 @@ feature{ANY}
 							io.put_string("3. Retour")
 							io.put_string("%N")
 						end
-					
-						io.flush
-						io.read_integer
-						reponse_int := io.last_integer
-						if (reponse_int > 0 and reponse_int < 6 and mediatheque.get_utilisateur_connecte.is_admin)
-							or (reponse_int > 0 and reponse_int < 4 and not mediatheque.get_utilisateur_connecte.is_admin) then
-							correct := True
-							if reponse_int = 1 then
-								io.put_string("Sur quel média voulez vous plus de détails ? (saisissez son numéro) %N")
-								io.flush
-								io.read_integer
-								media := io.last_integer
-								media := media - 1
-								afficher_detail_media(media)
-							end
-							if reponse_int = 2 then 
-								io.put_string("Quel media souhaitez vous emprunter? (saississez son numéro) %N")
-								io.flush
-								io.read_integer
-								media := io.last_integer
-								media := media - 1
-								mediatheque.get_gestionnaire_emprunt_reservation.emprunter_un_media(media)
-							end
-							if reponse_int = 3 and mediatheque.get_utilisateur_connecte.is_admin then 
-								io.put_string("Quel media souhaitez vous modifier ? (saississez son numéro) %N")
-								io.flush
-								io.read_integer
-								media := io.last_integer
-								media := media - 1
-								modifier_media(media)
-							end
-							if reponse_int = 4 and mediatheque.get_utilisateur_connecte.is_admin then 
-								io.put_string("Quel media souhaitez vous supprimer ? (saississez son numéro) %N")
-								io.flush
-								io.read_integer
-								media := io.last_integer
-								media := media - 1
-								supprimer_media(media)
-							end
-						else
-							if mediatheque.get_utilisateur_connecte.is_admin then
-								io.put_string("Veuillez taper soit 1, 2, 3, 4 ou 5")
-								io.put_string("%N")
+						scorrect := False
+						from
+						until scorrect 
+						loop
+							io.flush
+							io.read_line
+							reponse_str.copy(io.last_string)
+							if reponse_str.is_integer then
+								scorrect := True
+								if (reponse_str.to_integer > 0 and reponse_str.to_integer < 6 and mediatheque.get_utilisateur_connecte.is_admin)
+									or (reponse_str.to_integer > 0 and reponse_str.to_integer < 4 and not mediatheque.get_utilisateur_connecte.is_admin) then
+									correct := True
+									-- Consultation des détails d'un média
+									if reponse_str.to_integer = 1 then
+										io.put_string("Sur quel média voulez vous plus de détails ? (saisissez son numéro) %N")
+										io.flush
+										io.read_line
+										media.copy(io.last_string)
+										if media.is_integer then
+											media_int := media.to_integer - 1
+											afficher_detail_media(media_int)
+										else
+											io.put_string("Saissisez le numéro du média %N")
+										end
+									end
+									-- emprunt d'un média
+									if reponse_str.to_integer = 2 then 
+										io.put_string("Quel média souhaitez vous emprunter? (saississez son numéro) %N")
+										io.flush
+										io.read_line
+										media.copy(io.last_string)
+										if media.is_integer then
+											media_int := media.to_integer - 1
+											mediatheque.get_gestionnaire_emprunt_reservation.emprunter_un_media(media_int)										
+										else
+											io.put_string("Saissisez le numéro du média %N")
+										end
+									end
+									-- modification d'un média
+									if reponse_str.to_integer = 3 and mediatheque.get_utilisateur_connecte.is_admin then 
+										io.put_string("Quel média souhaitez vous modifier ? (saississez son numéro) %N")
+										io.flush
+										io.read_line
+										media.copy(io.last_string)
+										if media.is_integer then
+											media_int := media.to_integer - 1
+											modifier_media(media_int)
+										else
+											io.put_string("Saissisez le numéro du média %N")
+										end
+									end
+									-- suppression d'un média
+									if reponse_str.to_integer = 4 and mediatheque.get_utilisateur_connecte.is_admin then 
+										io.put_string("Quel media souhaitez vous supprimer ? (saississez son numéro) %N")
+										io.flush
+										io.read_line
+										media.copy(io.last_string)
+										if media.is_integer then
+											media_int := media.to_integer - 1
+											supprimer_media(media_int)
+										else
+											io.put_string("Saissisez le numéro du média %N")
+										end
+									end
+								else
+									if mediatheque.get_utilisateur_connecte.is_admin then
+										io.put_string("Veuillez taper soit 1, 2, 3, 4 ou 5")
+										io.put_string("%N")
+									else
+										io.put_string("Veuillez taper soit 1, 2 ou 3")
+										io.put_string("%N")
+									end
+								end -- nombre existant
 							else
-								io.put_string("Veuillez taper soit 1, 2 ou 3")
-								io.put_string("%N")
-							end
-						end
+								io.put_string("Tapez un nombre %N")
+							end -- is_integer
+						end -- boucle réponse correct
 					end
 				end
 			end
@@ -851,13 +900,14 @@ feature{ANY}
 			Result := mediatheque.get_lst_media_choisis.count
 		end
 
---afficher menu ajouter media
+    --afficher menu ajouter media
 	ajouter_media is
 		local
-			choix : INTEGER
+			choix : STRING
 			correct : BOOLEAN
 		do
 			correct := False
+			choix := ""
 			from
 			until correct
 			loop				
@@ -865,38 +915,42 @@ feature{ANY}
 				io.put_string("2. Ajouter un livre %N")
 				io.put_string("3. Retour au menu principal %N")
 				io.flush
-				io.read_integer
-				choix := io.last_integer
-						
-				if choix > 0 and choix < 4 then
-					inspect choix
-					when 1 then 
-						ajouter_dvd
-						correct := True					
-					when 2 then
-						ajouter_livre
-						correct := True					
-					when 3 then
-						correct := True					
-					end -- end inspect
+				io.read_line
+				choix.copy(io.last_string)
+				
+				if choix.is_integer then		
+					if choix.to_integer > 0 and choix.to_integer < 4 then
+						inspect choix.to_integer
+						when 1 then 
+							ajouter_dvd
+							correct := True					
+						when 2 then
+							ajouter_livre
+							correct := True					
+						when 3 then
+							correct := True					
+						end -- end inspect
+					else
+						io.put_string("Votre choix n'existe pas, Tapez 1,2 ou 3 %N")
+					end -- end if
 				else
-					io.put_string("Votre choix n'existe pas, Tapez 1,2 ou 3 %N")
-				end -- end if
+					io.put_string("Taper un chiffre%N")
+				end
 			end -- end loop
 		end -- end fonction
 		
 
- --ajouter un dvd   
+    --ajouter un dvd   
 	ajouter_dvd is
 		local
 			titre, nom, prenom, type: STRING
 			ligne, choix : STRING
 			fichier : TEXT_FILE_WRITE
 			dvd : DVD
-			correct, premier : BOOLEAN
+			correct, s_correct: BOOLEAN
 			indice : INTEGER
-			nb_exemplaires : INTEGER
-			annee : INTEGER
+			nb_exemplaires : STRING
+			annee : STRING
 			ajout : BOOLEAN
 			realisateur : REALISATEUR
 			acteur : ACTEUR
@@ -908,7 +962,8 @@ feature{ANY}
 			type := ""
 			ligne := ""
 			choix := ""
-			nb_exemplaires := 1
+			nb_exemplaires := ""
+			annee := ""
 			
 			io.put_string("%N")
 			io.put_string("********************************")
@@ -918,9 +973,9 @@ feature{ANY}
 			io.put_string("********************************")
 			io.put_string("%N")
 
+            -- titre du dvd
 			io.put_string("Titre du DVD ? ")
 			io.flush
-			io.read_line
 			io.read_line
 			titre.copy(io.last_string)
 			indice := verifier_lst_media(titre)
@@ -933,17 +988,23 @@ feature{ANY}
 			    from
 			    until correct
 			    loop
+			        -- nombre d'exemplaire
 				    io.put_string("Nombre d'exemplaires ? ")
 				    io.flush
-				    io.read_integer
-				    nb_exemplaires := io.last_integer
-				    if nb_exemplaires >= 0 and nb_exemplaires <= 1000 then
-				        dvd.set_nombre_exemplaires(nb_exemplaires)
-					    correct := True
-				    else
+				    io.read_line
+				    nb_exemplaires.copy(io.last_string)
+				    if nb_exemplaires.is_integer then
+						if nb_exemplaires.to_integer >= 0 and nb_exemplaires.to_integer <= 1000 then
+						    dvd.set_nombre_exemplaires(nb_exemplaires.to_integer)
+							correct := True
+						else
+							io.put_string("Veuillez taper un nombre")
+							io.put_string("%N")
+							correct := False
+						end
+					else	
 						io.put_string("Veuillez taper un nombre")
 						io.put_string("%N")
-						correct := False
 				    end
 			    end	
 			    
@@ -951,113 +1012,153 @@ feature{ANY}
 			    from
 			    until correct
 			    loop
+			        -- année de sortie
 				    io.put_string("Année de sortie du DVD ? ")
 				    io.flush
-				    io.read_integer
-				    annee := io.last_integer
-				    if annee >= 1000 and annee <= 9999 then
-				        dvd.set_annee(annee)
-					    correct := True
-				    else
-						io.put_string("Veuillez taper une année sur 4 chiffres")
+				    io.read_line
+				    annee.copy(io.last_string)
+				    if annee.is_integer then
+						if annee.to_integer >= 1000 and annee.to_integer <= 9999 then
+						    dvd.set_annee(annee.to_integer)
+							correct := True
+						else
+							io.put_string("Veuillez taper une année sur 4 chiffres")
+							io.put_string("%N")
+							correct := False
+						end
+					else
+						io.put_string("Veuillez taper un nombre")
 						io.put_string("%N")
-						correct := False
 				    end
 			    end	
 				
 				
 				-- ajouter des réalisateurs
-				io.put_string("*** Ajout des réalisateurs *** %N")
-				ajout := True
-				premier := True
-				from
-				until not ajout
-				loop
-				    create realisateur.make
-				    io.put_string("Nom ? ")
+				correct := False
+			    from
+			    until correct
+			    loop
+			        -- demande si ajouter réalisateur
+				    io.put_string("Voulez-vous ajouter un/des réalisateurs ? (O/N)")
 				    io.flush
-				    if premier then
-					    io.read_line
-					   	premier := False
-					end
-				    io.read_line
-				    nom.copy(io.last_string)
-				    realisateur.set_nom(nom)
-				    io.put_string("Prenom ? ")
-				    io.flush
-				    io.read_line
-				    prenom.copy(io.last_string)
-				    realisateur.set_prenom(prenom)
-				    dvd.ajouter_realisateur(realisateur)
-				    correct := False
-				    from
-				    until correct
-				    loop
-					    io.put_string("Souhaitez vous ajouter un autre réalisateur ? (O/N)")
-					    io.flush
-					    io.read_line
-					    choix.copy(io.last_string)
-					    if choix.is_equal("N") then
-					        ajout := False
-						    correct := True
-					    else
-						    if choix.is_equal("O") then
-						        ajout := True
-							    correct := True
-						    else
-							    io.put_string("Veuillez taper O pour Oui ou N %
-                                      %pour Non")
-							    io.put_string("%N")
-						    end
-					    end
-				    end	
-				end -- fin ajouter realisateur
+			        io.read_line
+			        choix.copy(io.last_string)
+			        -- si ajout
+			        if choix.is_equal("O") then
+			            correct := True
+				        io.put_string("*** Ajout des réalisateurs *** %N")
+				        ajout := True
+				        from
+				        until not ajout
+				        loop
+				            create realisateur.make
+				            io.put_string("Nom ? ")
+				            io.flush
+				            io.read_line
+				            nom.copy(io.last_string)
+				            realisateur.set_nom(nom)
+				            io.put_string("Prenom ? ")
+				            io.flush
+				            io.read_line
+				            prenom.copy(io.last_string)
+				            realisateur.set_prenom(prenom)
+				            dvd.ajouter_realisateur(realisateur)
+				            s_correct := False
+				            from
+				            until s_correct
+				            loop
+					            io.put_string("Souhaitez vous ajouter un autre réalisateur ? (O/N)")
+					            io.flush
+					            io.read_line
+					            choix.copy(io.last_string)
+					            if choix.is_equal("N") then
+					                ajout := False
+						            s_correct := True
+					            else
+						            if choix.is_equal("O") then
+						                ajout := True
+							            s_correct := True
+						            else
+							            io.put_string("Veuillez taper O pour Oui ou N %
+                                              %pour Non")
+							            io.put_string("%N")
+						            end
+					            end
+				            end	
+                        end
+				    elseif choix.is_equal("N") then
+				        correct := True
+				    else
+				        io.put_string("Veuillez taper O pour Oui ou N %
+                                              %pour Non")
+							            io.put_string("%N")
+			        end
+			    end -- fin ajouter realisateur
 				
 				-- ajouter des acteurs
-				io.put_string("*** Ajout des acteurs *** %N")
-				ajout := True
-				from
-				until not ajout
-				loop
-				    create acteur.make
-				    io.put_string("Nom ? ")
+				correct := False
+			    from
+			    until correct
+			    loop
+				    io.put_string("Voulez-vous ajouter un/des acteurs ? (O/N)")
 				    io.flush
-				    io.read_line
-				    nom.copy(io.last_string)
-				    acteur.set_nom(nom)
-				    io.put_string("Prénom ? ")
-				    io.flush
-				    io.read_line
-				    prenom.copy(io.last_string)
-				    acteur.set_prenom(prenom)
-				    dvd.ajouter_acteur(acteur)
-				    correct := False
-				    from
-				    until correct
-				    loop
-					    io.put_string("Souhaitez vous ajouter un autre acteur ? (O/N)")
-					    io.flush
-					    io.read_line
-					    choix.copy(io.last_string)
-					    if choix.is_equal("N") then
-					        ajout := False
-						    correct := True
-					    else
-						    if choix.is_equal("O") then
-						        ajout := True
-							    correct := True
-						    else
-							    io.put_string("Veuillez taper O pour Oui ou N %
-                                      %pour Non")
-							    io.put_string("%N")
-						    end
-					    end
-				    end	
-				end	-- fin ajouter acteur
+			        io.read_line
+			        choix.copy(io.last_string)
+			        -- si ajout d'un acteur
+			        if choix.is_equal("O") then
+			            correct := True
+				        io.put_string("*** Ajout des acteurs *** %N")
+				        ajout := True
+				        from
+				        until not ajout
+				        loop
+				            create acteur.make
+				            io.put_string("Nom ? ")
+				            io.flush
+				            io.read_line
+				            nom.copy(io.last_string)
+				            acteur.set_nom(nom)
+				            io.put_string("Prenom ? ")
+				            io.flush
+				            io.read_line
+				            prenom.copy(io.last_string)
+				            acteur.set_prenom(prenom)
+				            dvd.ajouter_acteur(acteur)
+				            s_correct := False
+				            from
+				            until s_correct
+				            loop
+					            io.put_string("Souhaitez vous ajouter un autre acteur ? (O/N)")
+					            io.flush
+					            io.read_line
+					            choix.copy(io.last_string)
+					            if choix.is_equal("N") then
+					                ajout := False
+						            s_correct := True
+					            else
+						            if choix.is_equal("O") then
+						                ajout := True
+							            s_correct := True
+						            else
+							            io.put_string("Veuillez taper O pour Oui ou N %
+                                              %pour Non")
+							            io.put_string("%N")
+						            end
+					            end
+				            end	
+                        end
+				    elseif choix.is_equal("N") then
+				        correct := True
+				    else
+				        io.put_string("Veuillez taper O pour Oui ou N %
+                                              %pour Non")
+							            io.put_string("%N")
+			        end
+			    end -- fin ajouter acteur
 				
+				-- ajout dans les listes
 				remplir_lst_realisateurs(dvd)
 				remplir_lst_acteurs(dvd)
-				mediatheque.get_lst_dvd.add_last(dvd)
 				
 				-- le dvd est-il un coffret ?
 				correct := False
@@ -1081,8 +1182,9 @@ feature{ANY}
 					    end
 				    end
 			    end
+				mediatheque.get_lst_dvd.add_last(dvd)
 				
-			else -- si dvd existe déjà
+			else -- si dvd existe déjà, on propose d'ajouter un exemplaire
 				io.put_string("Le média existe déjà.")
 				correct := False
 				dvd := mediatheque.get_lst_dvd.item(indice)
@@ -1097,7 +1199,7 @@ feature{ANY}
 						correct := True
 					else
 						if choix.is_equal("O") then
-						    mediatheque.get_lst_dvd.item(indice).set_nombre_exemplaires(mediatheque.get_lst_dvd.item(indice).get_nombre_exemplaires+1)
+						    mediatheque.get_lst_dvd.item(indice).ajouter_un_exemplaire
 							correct := True
 						else
 							io.put_string("Veuillez taper O pour Oui ou N %
@@ -1108,6 +1210,7 @@ feature{ANY}
 				end
 			end -- fin if dvd existe
 			
+			-- Formatter pour écrire dans le fichier
 			ligne.append("DVD ; Titre<"+dvd.get_titre+"> ; Annee<"+dvd.get_annee.to_string+"> ; ")
 			from i:= 0
 			until i = dvd.get_lst_realisateurs.count
@@ -1128,19 +1231,21 @@ feature{ANY}
 			    ligne.append("Nombre<"+dvd.get_nombre_exemplaires.to_string+">")
 			end
 			
+			-- écriture du média dans le fichier médias2
 			create fichier.make
 			fichier.connect_for_appending_to("medias2.txt")
 			fichier.put_line(ligne)
 			fichier.disconnect
-			 
+			io.put_string("DVD ajouté !%N")
 		end
 		
+	-- ajouter un livre
 	ajouter_livre is
 	    local
 	    	livre : LIVRE
 	    	auteur : AUTEUR
 	    	titre, nom, prenom : STRING
-	    	nb_exemplaires : INTEGER
+	    	nb_exemplaires : STRING
 	    	indice : INTEGER
 	    	correct : BOOLEAN
 	    	choix, ligne : STRING
@@ -1151,7 +1256,7 @@ feature{ANY}
 			titre := ""
 			ligne := ""
 			choix := ""
-			nb_exemplaires := 1
+			nb_exemplaires := ""
 			
 			
 			io.put_string("%N")
@@ -1163,17 +1268,19 @@ feature{ANY}
 			io.put_string("%N")
 			io.put_string("%N")
 
+            -- titre du livre
 			io.put_string("Titre du livre ? ")
 			io.flush
-			io.read_line
 			io.read_line
 			titre.copy(io.last_string)
 			indice := verifier_lst_media(titre)
 			
+			-- si le livre n'existe pas
 			if indice = -1 then
 			    create livre.make			    
 			    livre.set_titre(titre)
 			    
+			    -- création de l'auteur
 			    create auteur.make
 			    io.put_string("Nom de l'auteur ? ")
 			    io.flush
@@ -1190,27 +1297,33 @@ feature{ANY}
 				livre.set_auteur(auteur)
 				remplir_lst_auteurs(livre)
 			    
+			    -- nombre d'exemplaire
 			    correct := False
 			    from
 			    until correct
 			    loop
 				    io.put_string("Nombre d'exemplaires ? ")
 				    io.flush
-				    io.read_integer
-				    nb_exemplaires := io.last_integer
-				    if nb_exemplaires >= 0 and nb_exemplaires <= 1000 then
-				        livre.set_nombre_exemplaires(nb_exemplaires)
-					    correct := True
+				    io.read_line
+				    nb_exemplaires.copy(io.last_string)
+				    if nb_exemplaires.is_integer then
+						if nb_exemplaires.to_integer >= 0 and nb_exemplaires.to_integer <= 1000 then
+						    livre.set_nombre_exemplaires(nb_exemplaires.to_integer)
+							correct := True
+						else
+							io.put_string("Veuillez taper un nombre")
+							io.put_string("%N")
+							correct := False
+						end
 				    else
-						io.put_string("Veuillez taper un nombre")
+				    	io.put_string("Veuillez taper un nombre")
 						io.put_string("%N")
-						correct := False
 				    end
 			    end
-			    
+			    -- ajout du livre à la liste
 			    mediatheque.get_lst_livres.add_last(livre)
 			  
-			else -- si livre existe déjà
+			else -- si livre existe déjà, on propose d'ajouter un exemplaire
 				io.put_string("Le média existe déjà.")
 				correct := False
 				livre := mediatheque.get_lst_livres.item(indice)
@@ -1225,7 +1338,7 @@ feature{ANY}
 						correct := True
 					else
 						if choix.is_equal("O") then
-						    mediatheque.get_lst_livres.item(indice).set_nombre_exemplaires(mediatheque.get_lst_livres.item(indice).get_nombre_exemplaires+1)
+						    mediatheque.get_lst_livres.item(indice).ajouter_un_exemplaire
 							correct := True
 						else
 							io.put_string("Veuillez taper O pour Oui ou N %
@@ -1236,18 +1349,21 @@ feature{ANY}
 				end
 			end -- fin if livre existe
 			
+			-- formattage pour ajout au fichier
 			ligne.append("Livre ; Titre<"+livre.get_titre+"> ; Auteur<"+livre.get_auteur.get_prenom+" "+livre.get_auteur.get_nom+"> ")
 			if livre.get_nombre_exemplaires > 1 then
 			    ligne.append("; Nombre<"+livre.get_nombre_exemplaires.to_string+">")
 			end
 			
+			-- écriture dans le fichier
 			create fichier.make
 			fichier.connect_for_appending_to("medias2.txt")
 			fichier.put_line(ligne)
 			fichier.disconnect
+			io.put_string("Livre ajouté !%N")
 	    end
 	    
-	
+	-- afficher la liste de média trouvé dans la recherche
 	afficher_media_choisi is
 		local
 			i, j: INTEGER
@@ -1263,12 +1379,14 @@ feature{ANY}
 			end
 		end
 		
+	-- affiche le détail associé à un média
 	afficher_detail_media(choix_media : INTEGER) is
 		local
 			livre : LIVRE
 			dvd : DVD
 			i,j : INTEGER
 		do
+		    -- recherche le média dans la liste
 			from i:= 0
 			until i = mediatheque.get_lst_media_choisis.count
 			loop
@@ -1303,6 +1421,7 @@ feature{ANY}
 			io.put_string("%N")
 			io.put_string("********************************")
 			io.put_string("%N")
+			-- si c'est un livre
 			if livre /= Void then
 				io.put_string("Titre : "+livre.get_titre)
 				io.put_string("%N")
@@ -1311,7 +1430,7 @@ feature{ANY}
 				io.put_string("Nombre d'exemplaire : ")
 				io.put_integer(livre.get_nombre_exemplaires)
 				io.put_string("%N")
-			else
+			else -- si c'est un dvd
 				io.put_string("Titre : "+dvd.get_titre)
 				io.put_string("%N")
 				io.put_string("Année de parution : ")
@@ -1344,13 +1463,22 @@ feature{ANY}
 				end
 			end	
 		end
-		
+	
+	-- Fonction récupérant le média choisi et appelant la fonction de modification associée
 	modifier_media(choix_media : INTEGER) is
 		local
 			livre, new_livre : LIVRE
 			dvd, new_dvd : DVD
 			i,j : INTEGER
 		do
+		    io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+			io.put_string("*        MODIFIER MEDIA        *")
+			io.put_string("%N")
+			io.put_string("********************************")
+			io.put_string("%N")
+		    -- on cherche le média dans la liste des médias choisis
 			from i:= 0
 			until i = mediatheque.get_lst_media_choisis.count
 			loop
@@ -1378,20 +1506,22 @@ feature{ANY}
 				i := i+1
 			end
 			
+			-- Si c'est un livre on appelle modifier_livre sinon modifier_dvd
 			if livre /= Void then
 				new_livre := modifier_livre(livre)
 			else
 				new_dvd := modifier_dvd(dvd)
-			end
-			
+			end			
 		end
 	
+	-- Fonction permettant de modifier un livre
 	modifier_livre(livre : LIVRE) : LIVRE is
 		local
 			choix : STRING
 			correct : BOOLEAN
 		do
 			choix := ""
+			-- modification du titre
 			io.put_string("Titre actuel : "+livre.get_titre+"%N")
 			correct := False
 			from
@@ -1399,7 +1529,6 @@ feature{ANY}
 			loop
 				io.put_string("Modifier titre ? O/N %N")
 				io.flush
-				io.read_line
 				io.read_line
 				choix.copy(io.last_string)
 				if choix.is_equal("O") then
@@ -1414,6 +1543,7 @@ feature{ANY}
 					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
 				end
 			end
+			-- modification de l'auteur
 			io.put_string("Auteur actuel : "+livre.get_auteur.get_nom+" "+livre.get_auteur.get_prenom+"%N")
 			correct := False
 			from
@@ -1439,6 +1569,7 @@ feature{ANY}
 					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
 				end
 			end
+			-- ajout d'un exemplaire
 			io.put_string("Nombre d'exemplaires actuel : "+livre.get_nombre_exemplaires.to_string+"%N")
 			correct := False
 			from
@@ -1458,27 +1589,29 @@ feature{ANY}
 					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
 				end
 			end
+			io.put_string("Livre modifié %N")
 			Result := livre
 		end
 		
+	-- fonction permettant de modifier un dvd
 	modifier_dvd(dvd : DVD) : DVD is
 		local
 			choix : STRING
 			continuer, correct, correct_a : BOOLEAN
 			acteur : ACTEUR
 			realisateur : REALISATEUR
-			modifier_annee : BOOLEAN
+			annee : STRING
 		do
 			choix := ""
+			annee := ""
+			-- modification du titre
 			io.put_string("Titre actuel : "+dvd.get_titre+"%N")
 			correct := False
-			modifier_annee := False
 			from
 			until correct
 			loop
 				io.put_string("Modifier titre ? O/N %N")
 				io.flush
-				io.read_line
 				io.read_line
 				choix.copy(io.last_string)
 				if choix.is_equal("O") then
@@ -1493,6 +1626,7 @@ feature{ANY}
 					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
 				end
 			end
+			--- ajout d'un exemplaire
 			io.put_string("Nombre d'exemplaires actuel : "+dvd.get_nombre_exemplaires.to_string+"%N")
 			correct := False
 			from
@@ -1512,6 +1646,7 @@ feature{ANY}
 					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
 				end
 			end
+			-- modification de l'année
 			io.put_string("Année de parution actuelle : "+dvd.get_annee.to_string+"%N")
 			correct := False
 			from
@@ -1522,11 +1657,21 @@ feature{ANY}
 				io.read_line
 				choix.copy(io.last_string)
 				if choix.is_equal("O") then
-					modifier_annee := True
-					io.put_string("Nouvelle année : ")
-					io.flush
-					io.read_integer
-					dvd.set_annee(io.last_integer)
+					correct_a := False
+					from
+					until correct_a
+					loop
+						io.put_string("Nouvelle année : ")
+						io.flush
+						io.read_line
+						annee.copy(io.last_string)
+						if annee.is_integer then
+							correct_a := True
+							dvd.set_annee(annee.to_integer)
+						else	
+							io.put_string("Tapez un nombre %N")
+						end
+					end
 					correct := True
 				elseif choix.is_equal("N") then
 					correct := True
@@ -1534,6 +1679,7 @@ feature{ANY}
 					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
 				end
 			end
+			-- ajout d'un acteur
 			correct := False
 			from
 			until correct
@@ -1541,10 +1687,6 @@ feature{ANY}
 				io.put_string("Ajouter un acteur ? O/N %N")
 				io.flush
 				io.read_line
-				if modifier_annee then
-					modifier_annee := False
-					io.read_line
-				end
 				choix.copy(io.last_string)
 				if choix.is_equal("O") then
 					continuer := True
@@ -1586,6 +1728,7 @@ feature{ANY}
 					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
 				end
 			end
+			-- ajout d'un réalisateur
 			correct := False
 			from
 			until correct
@@ -1634,6 +1777,7 @@ feature{ANY}
 					io.put_string("Veuillez taper O pour Oui ou N pour Non %N")
 				end
 			end
+			io.put_string("DVD modifié %N")
 			Result := dvd
 		end
 		
@@ -1675,6 +1819,7 @@ feature{ANY}
 			Result := position
 		end
 		
+	-- supprime un média de la liste des médias et du fichier des médias à partir de la position dans la liste des médias 
 	supprimer_media(choix_media : INTEGER) is
 		local
 			livre : LIVRE
@@ -1687,6 +1832,7 @@ feature{ANY}
 		do
 			position_lst_livre := -1
 			position_lst_dvd := -1
+			-- récupère le média correspondant
 			from i:= 0
 			until i = mediatheque.get_lst_media_choisis.count
 			loop
@@ -1716,27 +1862,24 @@ feature{ANY}
 				i := i+1
 			end
 			
+			-- Si le média trouvé est un livre
 			if position_lst_livre > -1 then
 				if livre.get_lst_emprunts.count = 0 and livre.get_lst_reservations.count = 0 then
+				    -- supprime le livre de la liste et du fichier
 					supprime := supprimer_livre_fichier(livre)
-					if supprime then
-						mediatheque.get_lst_livres.remove(position_lst_livre)
-						io.put_string("Le livre a été supprimé %N")
-					else
-						io.put_string("Erreur lors de la suppression dans le fichier")
-					end
+					mediatheque.get_lst_livres.remove(position_lst_livre)
+					io.put_string("Le livre a été supprimé %N")
 				else
 					io.put_string("Le livre ne peut pas être supprimé car il est emprunté/réservé %N")
 				end
+			-- si c'est un dvd
 			elseif position_lst_dvd > -1 then
 				if dvd.get_lst_emprunts.count = 0 and dvd.get_lst_reservations.count = 0 then
-					supprime := supprimer_dvd_fichier(dvd)
-					if supprime then
-						mediatheque.get_lst_dvd.remove(position_lst_dvd)
-						io.put_string("Le dvd a été supprimé %N")
-					else
-						io.put_string("Erreur lors de la suppression dans le fichier")
-					end
+				    -- supprimer du fichier et de la liste des dvd
+					supprime := supprimer_dvd_fichier(dvd)				
+					mediatheque.get_lst_dvd.remove(position_lst_dvd)
+					io.put_string("Le dvd a été supprimé %N")
+					
 				else
 					io.put_string("Le dvd ne peut pas être supprimé car il est emprunté/réservé %N")
 				end
@@ -1745,7 +1888,7 @@ feature{ANY}
 			end
 		end
 		
-		
+    -- parcours les deux fichiers et supprimer le livre s'il est présent
 	supprimer_livre_fichier(livre : LIVRE) : BOOLEAN is
 		local
 			fichier_r1 : TEXT_FILE_READ
@@ -1760,11 +1903,13 @@ feature{ANY}
 			supprime := False
 			create fichier_r1.make
 			fichier_r1.connect_to("medias.txt")
+			-- parcours du premier fichier
 			if fichier_r1.is_connected then
 				create tableau_media.with_capacity(1,0)
 				from
 				until fichier_r1.end_of_input
 				loop
+				    ligne := ""
 					fichier_r1.read_line_in(ligne)
 					if ligne.has_substring(livre.get_titre) and ligne.has_substring(livre.get_auteur.get_nom) 
 						and ligne.has_substring(livre.get_auteur.get_prenom) then
@@ -1774,6 +1919,7 @@ feature{ANY}
 					end
 				end
 				fichier_r1.disconnect
+				--réécriture du premier fichier si média trouvé
 				if supprime then
 					create fichier_w1.make
 					fichier_w1.connect_to("medias.txt")
@@ -1786,6 +1932,7 @@ feature{ANY}
 					fichier_w1.disconnect
 				end			
 			end
+			-- parcours du deuxième fichier
 			if not supprime then
 				create fichier_r2.make
 				fichier_r2.connect_to("medias2.txt")
@@ -1794,6 +1941,7 @@ feature{ANY}
 					from
 					until fichier_r2.end_of_input
 					loop
+					    ligne := ""
 						fichier_r2.read_line_in(ligne)
 						if ligne.has_substring(livre.get_titre) and ligne.has_substring(livre.get_auteur.get_nom) 
 							and ligne.has_substring(livre.get_auteur.get_prenom) then
@@ -1803,6 +1951,7 @@ feature{ANY}
 						end
 					end
 					fichier_r2.disconnect
+					-- réécriture du deuxième fichier si le média est trouvé
 					if supprime then
 						create fichier_w2.make
 						fichier_w2.connect_to("medias2.txt")
@@ -1819,7 +1968,8 @@ feature{ANY}
 			Result := supprime
 		end
 		
-		supprimer_dvd_fichier(dvd : DVD) : BOOLEAN is
+	-- supprime le dvd du fichier s'ile st présent
+	supprimer_dvd_fichier(dvd : DVD) : BOOLEAN is
 		local
 			fichier_r1 : TEXT_FILE_READ
 			fichier_r2 : TEXT_FILE_READ
@@ -1827,9 +1977,10 @@ feature{ANY}
 			fichier_w2 : TEXT_FILE_WRITE
 			tableau_media : ARRAY[STRING]
 			ligne : STRING
-			supprime : BOOLEAN
+			supprime: BOOLEAN
 			i : INTEGER
 		do
+		    -- parcours du premier fichier
 			supprime := False
 			create fichier_r1.make
 			fichier_r1.connect_to("medias.txt")
@@ -1840,14 +1991,22 @@ feature{ANY}
 				loop
 					ligne := ""
 					fichier_r1.read_line_in(ligne)
-					if ligne.has_substring(dvd.get_titre) and ligne.has_substring(dvd.get_lst_realisateurs.item(0).get_nom) 
-						and ligne.has_substring(dvd.get_lst_realisateurs.item(0).get_prenom) then
-						supprime := True
+					if dvd.get_lst_realisateurs.count > 0 then
+					    if ligne.has_substring(dvd.get_titre) and ligne.has_substring(dvd.get_lst_realisateurs.item(0).get_nom) 
+						    and ligne.has_substring(dvd.get_lst_realisateurs.item(0).get_prenom) then
+						    supprime := True
+						end
 					else
-						tableau_media.add_last(ligne)
+				        if ligne.has_substring(dvd.get_titre) then
+						    supprime := True
+						end
+					end
+					if not supprime then
+					    tableau_media.add_last(ligne)
 					end
 				end
 				fichier_r1.disconnect
+				-- réécriture du premier fichier sans le dvd si le média est trouvé
 				if supprime then
 					create fichier_w1.make
 					fichier_w1.connect_to("medias.txt")
@@ -1860,6 +2019,7 @@ feature{ANY}
 					fichier_w1.disconnect
 				end			
 			end
+			-- parcours du deuxième fichier
 			if not supprime then
 				create fichier_r2.make
 				fichier_r2.connect_to("medias2.txt")
@@ -1870,14 +2030,22 @@ feature{ANY}
 					loop
 						ligne := ""
 						fichier_r2.read_line_in(ligne)
-						if ligne.has_substring(dvd.get_titre) and ligne.has_substring(dvd.get_lst_realisateurs.item(0).get_nom) 
-							and ligne.has_substring(dvd.get_lst_realisateurs.item(0).get_prenom) then
-							supprime := True
-						else
-							tableau_media.add_last(ligne)
-						end
+						if dvd.get_lst_realisateurs.count > 0 then
+					        if ligne.has_substring(dvd.get_titre) and ligne.has_substring(dvd.get_lst_realisateurs.item(0).get_nom) 
+						        and ligne.has_substring(dvd.get_lst_realisateurs.item(0).get_prenom) then
+						        supprime := True
+						    end
+					    else
+				            if ligne.has_substring(dvd.get_titre) then
+						        supprime := True
+						    end
+					    end
+					    if not supprime then
+					        tableau_media.add_last(ligne)
+					    end
 					end
 					fichier_r2.disconnect
+					-- réécriture du deuxième fichier sans le dvd si le média est trouvé
 					if supprime then
 						create fichier_w2.make
 						fichier_w2.connect_to("medias2.txt")
@@ -1893,7 +2061,4 @@ feature{ANY}
 			end
 			Result := supprime
 		end
-			
-	
-	
-end
+    end

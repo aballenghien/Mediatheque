@@ -21,6 +21,9 @@ feature{ANY}
 	make is
 		local
 			continuer : BOOLEAN
+			quitter : BOOLEAN
+			correct : BOOLEAN
+			choix  : STRING
 		do
 			create lst_users.with_capacity(1,0)			
 			create lst_auteurs.with_capacity(1,0)
@@ -34,21 +37,45 @@ feature{ANY}
 			create gestionnaire_emprunt_reservation.make(Current)
 			-- on affiche le menu tant que l'utilisateur n'a pas décidé 
 			-- de quitter
-			continuer := True
+			quitter := False
 			-- remplissage des listes
 			initialisation
-			-- connexion de l'utilisateur, instanciation de la variable utilisateur_connecte
-			connexion			
+			-- Propose de se connecter tant que l'utilisateur n'a pas décider de quitter
 			from
-			until not continuer
-			loop
-				-- si un utilisateur est connecté
-				if utilisateur_connecte /= Void then
-					-- on affiche le menu
-					continuer := afficher_menu					
-				else
-					continuer := False
-				end
+			until quitter
+			loop			
+			    continuer := True			    
+			    -- connexion de l'utilisateur, instanciation de la variable utilisateur_connecte
+			    connexion			
+			    from
+			    until not continuer
+			    loop
+				    -- si un utilisateur est connecté
+				    if utilisateur_connecte /= Void then
+					    -- on affiche le menu
+					    continuer := afficher_menu					
+				    else
+					    continuer := False
+				    end
+			    end
+			    correct := False		    
+			    from
+			    until correct 
+			    loop
+			        io.put_string("Quitter ? (O/N)%N")
+			        io.flush
+			        io.read_line
+			        choix := io.last_string
+			        if choix.is_equal("O") or choix.is_equal("N") then
+			            correct := True
+			        else
+			            io.put_string("Tapez O pour oui et N pour non %N")
+			        end
+			    end
+			    if choix.is_equal("O") then
+			        quitter := True
+			    end
+			    
 			end
 		end
 		
@@ -264,11 +291,12 @@ feature{ANY}
 	-- Fonction qui affiche le menu		
 	afficher_menu : BOOLEAN is
 		local
-			choix : INTEGER
+			choix : STRING
 			continuer: BOOLEAN
+			correct : BOOLEAN
 		do
 			continuer := True
-			choix := 0
+			choix := ""
 			io.put_string("%N")
 			io.put_string("********************************")
 			io.put_string("%N")
@@ -312,75 +340,84 @@ feature{ANY}
 				io.put_string("%N")
 			end
 			
-			io.flush
-			io.read_integer
-			-- on récupére ce que l'utilisateur à saisi
-			choix := io.last_integer
-			
-			if not utilisateur_connecte.is_admin then
-				if choix > 0 and choix < 6 then
-					inspect choix
-					when 1 then
-						afficher_menu_consultation
-					when 2 then
-						gestionnaire_media.rechercher_media
-					when 3 then
-						gestionnaire_emprunt_reservation.gerer_emprunt_reservation
-					when 4 then
-						gestionnaire_utilisateur.afficher_info_compte(utilisateur_connecte)
-					when 5 then
-						io.put_string("Déconnexion")
-						io.put_string("%N")
-						continuer := False
+			correct := False
+			from
+			until correct
+			loop
+				io.flush
+				io.read_line
+				-- on récupére ce que l'utilisateur à saisi
+				choix.copy(io.last_string)
+				
+				if choix.is_integer then
+					correct := True
+					if not utilisateur_connecte.is_admin then
+						if choix.to_integer > 0 and choix.to_integer < 6 then
+							inspect choix.to_integer
+							when 1 then
+								afficher_menu_consultation
+							when 2 then
+								gestionnaire_media.rechercher_media
+							when 3 then
+								gestionnaire_emprunt_reservation.gerer_emprunt_reservation
+							when 4 then
+								gestionnaire_utilisateur.afficher_info_compte(utilisateur_connecte)
+							when 5 then
+								io.put_string("Déconnexion")
+								io.put_string("%N")
+								continuer := False
+							end
+						else
+							io.put_string("Veuillez choisir un chiffre entre 1 et 4")
+							io.put_string("%N")
+						end
+					elseif utilisateur_connecte.is_admin then
+						if choix.to_integer > 0 and choix.to_integer < 12 then
+							inspect choix.to_integer
+							when 1 then
+								afficher_menu_consultation
+							when 2 then
+								gestionnaire_media.rechercher_media
+							when 3 then
+								gestionnaire_emprunt_reservation.gerer_emprunt_reservation
+							when 4 then
+								gestionnaire_emprunt_reservation.gerer_emprunts_reservations_admin
+							when 5 then
+								gestionnaire_media.ajouter_media
+							when 6 then
+								afficher_tableau("USER")
+							when 7 then
+								gestionnaire_utilisateur.rechercher
+							when 8 then
+								gestionnaire_utilisateur.ajouter_utilisateur
+								io.put_string("%N")
+							when 9 then
+								gestionnaire_utilisateur.modifier_un_utilisateur
+							when 10 then
+								gestionnaire_utilisateur.afficher_info_compte(utilisateur_connecte)
+							when 11 then
+								io.put_string("Déconnexion")
+								io.put_string("%N")
+								continuer := False
+							end
+						else
+							io.put_string("Veuillez choisir un chiffre entre 1 et 9")
+							io.put_string("%N")
+						end
 					end
 				else
-					io.put_string("Veuillez choisir un chiffre entre 1 et 4")
-					io.put_string("%N")
+					io.put_string("Tapez un chiffre correspondant à un menu%N")
 				end
-			elseif utilisateur_connecte.is_admin then
-				if choix > 0 and choix < 12 then
-					inspect choix
-					when 1 then
-						afficher_menu_consultation
-					when 2 then
-						gestionnaire_media.rechercher_media
-					when 3 then
-						gestionnaire_emprunt_reservation.gerer_emprunt_reservation
-					when 4 then
-						gestionnaire_emprunt_reservation.gerer_emprunts_reservations_admin
-					when 5 then
-						gestionnaire_media.ajouter_media
-					when 6 then
-						afficher_tableau("USER")
-					when 7 then
-						gestionnaire_utilisateur.rechercher
-					when 8 then
-						gestionnaire_utilisateur.ajouter_utilisateur
-						io.put_string("%N")
-					when 9 then
-						gestionnaire_utilisateur.modifier_un_utilisateur
-					when 10 then
-						gestionnaire_utilisateur.afficher_info_compte(utilisateur_connecte)
-					when 11 then
-						io.put_string("Déconnexion")
-						io.put_string("%N")
-						continuer := False
-					end
-				else
-					io.put_string("Veuillez choisir un chiffre entre 1 et 9")
-					io.put_string("%N")
-				end
-			end
-			
+			end			
 			Result := continuer
 		end
 		
 	afficher_menu_consultation is
 		local
-			choix : INTEGER
-			continuer : BOOLEAN
+			choix : STRING
+			continuer, correct : BOOLEAN
 		do		
-			choix := 0
+			choix := ""
 			io.put_string("%N")
 			io.put_string("********************************")
 			io.put_string("%N")
@@ -405,35 +442,45 @@ feature{ANY}
 			io.put_string("7. Retour ")
 			io.put_string("%N")
 			
-			io.flush
-			io.read_integer
-			-- on récupére ce que l'utilisateur à saisi
-			choix := io.last_integer
-			
-			if choix > 0 and choix < 8 then
-				inspect choix
-				when 1 then
-					afficher_tableau("MEDIA")
-				when 2 then
-					afficher_tableau("LIVRE")
-				when 3 then
-					afficher_tableau("AUTEUR")
-				when 4 then
-					afficher_tableau("DVD")
-				when 5 then 
-					afficher_tableau("ACTEUR")
-				when 6 then
-					afficher_tableau("REALISATEUR")
-				when 7 then 
-					continuer := afficher_menu
+			correct := False
+			from 
+			until correct
+			loop
+				io.flush
+				io.read_line
+				-- on récupére ce que l'utilisateur à saisi
+				choix.copy(io.last_string)
+				
+				if choix.is_integer then
+					correct := True
+					if choix.to_integer > 0 and choix.to_integer < 8 then
+						inspect choix.to_integer
+						when 1 then
+							afficher_tableau("MEDIA")
+						when 2 then
+							afficher_tableau("LIVRE")
+						when 3 then
+							afficher_tableau("AUTEUR")
+						when 4 then
+							afficher_tableau("DVD")
+						when 5 then 
+							afficher_tableau("ACTEUR")
+						when 6 then
+							afficher_tableau("REALISATEUR")
+						when 7 then 
+							continuer := afficher_menu
+						else
+							io.put_string("Vous n'êtes pas autorisé à exécuter cette action.")
+							io.put_string("%N")
+						end
+					else
+						io.put_string("Veuillez choisir un chiffre entre 1 et 7")
+						io.put_string("%N")
+					end	
 				else
-					io.put_string("Vous n'êtes pas autorisé à exécuter cette action.")
-					io.put_string("%N")
+					io.put_string("Tapez un chiffre correspondant à un menu%N")
 				end
-			else
-				io.put_string("Veuillez choisir un chiffre entre 1 et 7")
-				io.put_string("%N")
-			end	
+			end
 		end	
 	
 	-- Fonctino effectuant la connexion d'un utilisateur

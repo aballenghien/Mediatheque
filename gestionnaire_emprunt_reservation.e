@@ -397,7 +397,6 @@ feature{ANY}
 						io.put_string("Ce livre est déjà emprunté, souhaitez vous le réserver ? (O/N) %N")
 						io.flush
 						io.read_line
-						io.read_line
 						choix := io.last_string
 						if choix.is_equal("O") or choix.is_equal("N") then
 							correct := True
@@ -423,7 +422,6 @@ feature{ANY}
 						loop
 							io.put_string("Vous avez déjà emprunté trois médias, souhaitez vous réserver ce livre? (O/N) %N")
 							io.flush
-							io.read_line
 							io.read_line
 							choix := io.last_string
 							if choix.is_equal("O") or choix.is_equal("N") then
@@ -484,7 +482,6 @@ feature{ANY}
 						io.put_string("Ce DVD est déjà emprunté, souhaitez vous le réserver ? (O/N) %N")
 						io.flush
 						io.read_line
-						io.read_line
 						choix := io.last_string
 						if choix.is_equal("O") or choix.is_equal("N") then
 							correct := True
@@ -507,7 +504,6 @@ feature{ANY}
 						loop
 							io.put_string("Vous avez déjà emprunté trois médias, souhaitez vous réserver ce DVD? (O/N) %N")
 							io.flush
-							io.read_line
 							io.read_line
 							choix := io.last_string
 							if choix.is_equal("O") or choix.is_equal("N") then
@@ -558,8 +554,8 @@ feature{ANY}
 	-- affichage du menu permettant à l'utilisateur de consulter ses emprunts et ses réservations
 	gerer_emprunt_reservation is
 		local
-			continuer : BOOLEAN
-			choix_gestion : INTEGER
+			continuer, correct : BOOLEAN
+			choix_gestion : STRING
 		do
 			continuer := True
 			from
@@ -577,22 +573,31 @@ feature{ANY}
 				io.put_string("2. Consulter mes emprunts %N")
 				io.put_string("3. Annuler une réservation %N")
 				io.put_string("4. Retour %N")
-				io.flush
-				io.read_integer
-				choix_gestion := io.last_integer
-				if choix_gestion > 0 and choix_gestion < 5 then
-					inspect choix_gestion
-					when 1 then 
-						afficher_reservations
-					when 2 then
-						afficher_emprunts
-					when 3 then
-						annuler_reservation
-					when 4 then
-						continuer := False
+				correct := False
+				from
+				until correct
+				loop
+					io.flush
+					io.read_line
+					choix_gestion.copy(io.last_string)
+					if choix_gestion.is_integer then
+						if choix_gestion.to_integer > 0 and choix_gestion.to_integer < 5 then
+							inspect choix_gestion.to_integer
+							when 1 then 
+								afficher_reservations
+							when 2 then
+								afficher_emprunts
+							when 3 then
+								annuler_reservation
+							when 4 then
+								continuer := False
+							end
+						else
+							io.put_string("Saississez un nombre compris entre 1 et 4 %N")
+						end
+					else
+						io.put_string("Saississez un nombre compris entre 1 et 4 %N")
 					end
-				else
-					io.put_string("Saississez un nombre compris entre 1 et 4 %N")
 				end
 			end
 		end
@@ -655,9 +660,10 @@ feature{ANY}
 	annuler_reservation is 
 		local 
 			i : INTEGER
-			choix : INTEGER
+			choix : STRING
 			correct : BOOLEAN
 		do
+			choix := ""
 			io.put_string("%N")
 			io.put_string("********************************")
 			io.put_string("%N")
@@ -684,17 +690,23 @@ feature{ANY}
 				loop
 					io.put_string("Quelle réservation souhaitez vous annuler ? (Saississez son numéro)%N")
 					io.flush
-					io.read_integer
-					choix := io.last_integer
-					if choix > 0 and choix <= i then
-						correct := True
-						-- suppression de la réservation dans le fichier						
-						supprimer_reservation_fichier(mediatheque.get_utilisateur_connecte.get_lst_reservations.item(choix-1))
-						-- la réservation est dissocié du média dans la liste
-						supprimer_reservation_liste_medias(mediatheque.get_utilisateur_connecte.get_lst_reservations.item(choix-1))
-						-- suppression de la réservation dans la liste de l'utilisateur
-						mediatheque.get_utilisateur_connecte.get_lst_reservations.remove(choix-1)
-						io.put_string("Réservation annulée %N")
+					io.read_line
+					choix.copy(io.last_string)
+					if choix.is_integer then
+						if choix.to_integer > 0 and choix.to_integer <= i then
+							correct := True
+							-- suppression de la réservation dans le fichier						
+							supprimer_reservation_fichier(mediatheque.get_utilisateur_connecte.get_lst_reservations.item(choix.to_integer-1))
+							-- la réservation est dissocié du média dans la liste
+							supprimer_reservation_liste_medias(mediatheque.get_utilisateur_connecte.get_lst_reservations.item(choix.to_integer-1))
+							-- suppression de la réservation dans la liste de l'utilisateur
+							mediatheque.get_utilisateur_connecte.get_lst_reservations.remove(choix.to_integer-1)
+							io.put_string("Réservation annulée %N")
+						else
+							io.put_string("Saisissez un numero de média%N")
+						end
+					else
+						io.put_string("Saisissez un numero de média%N")
 					end
 				end
 			end
@@ -706,7 +718,7 @@ feature{ANY}
 				i : INTEGER
 				correct : BOOLEAN
 				compteur: INTEGER
-				choix : INTEGER
+				choix : STRING
 				utilisateur : UTILISATEUR
 			do
 				io.put_string("%N")
@@ -718,14 +730,12 @@ feature{ANY}
 				io.put_string("%N")
 				correct := False
 				compteur := 1
+				choix := ""
 				from
 				until correct or compteur = 4
 				loop
 					io.put_string("Identifiant de l'utilisateur : %N")
 					io.flush
-					if compteur = 1 then
-						io.read_line
-					end
 					io.read_line
 					identifiant := io.last_string
 					from i := 0
@@ -765,17 +775,23 @@ feature{ANY}
 						loop
 							io.put_string("Quel emprunt se termine ? (Saisissez son numéro)%N")
 							io.flush
-							io.read_integer
-							choix := io.last_integer
-							if choix > 0 and choix <= i then							
-								-- suppression de l'emprunt pour le média concerné dans la liste des médias
-								supprimer_emprunt_liste_medias(utilisateur.get_lst_emprunts.item(choix-1))
-								--suppression de l'emprunt du fichier des emprunts
-								supprimer_emprunt_fichier(utilisateur.get_lst_emprunts.item(choix-1))
-								-- suppression de l'emprunt de la liste de l'utilisateur concerné
-								utilisateur.get_lst_emprunts.remove(choix-1)
-								correct := True
-								io.put_string("Emprunt terminé ! %N")
+							io.read_line
+							choix.copy(io.last_string)
+							if choix.is_integer then
+								if choix.to_integer > 0 and choix.to_integer <= i then							
+									-- suppression de l'emprunt pour le média concerné dans la liste des médias
+									supprimer_emprunt_liste_medias(utilisateur.get_lst_emprunts.item(choix.to_integer-1))
+									--suppression de l'emprunt du fichier des emprunts
+									supprimer_emprunt_fichier(utilisateur.get_lst_emprunts.item(choix.to_integer-1))
+									-- suppression de l'emprunt de la liste de l'utilisateur concerné
+									utilisateur.get_lst_emprunts.remove(choix.to_integer-1)
+									correct := True
+									io.put_string("Emprunt terminé ! %N")
+								else
+									io.put_string("Saisissez un numero de média%N")
+								end
+							else
+								io.put_string("Saisissez un numero de média%N")
 							end
 						end
 					else
@@ -791,7 +807,7 @@ feature{ANY}
 				i : INTEGER
 				correct : BOOLEAN
 				compteur: INTEGER
-				choix : INTEGER
+				choix : STRING
 				utilisateur : UTILISATEUR
 			do
 				io.put_string("%N")
@@ -803,14 +819,12 @@ feature{ANY}
 				io.put_string("%N")
 				correct := False
 				compteur := 1
+				choix := ""
 				from
 				until correct or compteur = 4
 				loop
 					io.put_string("Identifiant de l'utilisateur : %N")
 					io.flush
-					if compteur =1 then
-						io.read_line
-					end
 					io.read_line
 					identifiant := io.last_string
 					from i := 0
@@ -850,18 +864,24 @@ feature{ANY}
 						loop
 							io.put_string("Quel réservation doit être annulée ? (Saisissez son numéro)%N")
 							io.flush
-							io.read_integer
-							choix := io.last_integer
-							if choix > 0 and choix <= i then
-								--suppression de la réservation dans le fichier des réservations
-								supprimer_reservation_fichier(utilisateur.get_lst_reservations.item(choix-1))
-								-- suppression de la réservation pour le média concerné
-								supprimer_reservation_liste_medias(utilisateur.get_lst_reservations.item(choix-1))
-								-- suppression de la réservation dans la liste de l'utilisateur concerné
-								utilisateur.get_lst_reservations.remove(choix-1)
-								correct := True
-								io.flush
-								io.put_string("Réservation annulée ! %N")
+							io.read_line
+							choix.copy(io.last_string)
+							if choix.is_integer then
+								if choix.to_integer > 0 and choix.to_integer <= i then
+									--suppression de la réservation dans le fichier des réservations
+									supprimer_reservation_fichier(utilisateur.get_lst_reservations.item(choix.to_integer-1))
+									-- suppression de la réservation pour le média concerné
+									supprimer_reservation_liste_medias(utilisateur.get_lst_reservations.item(choix.to_integer-1))
+									-- suppression de la réservation dans la liste de l'utilisateur concerné
+									utilisateur.get_lst_reservations.remove(choix.to_integer-1)
+									correct := True
+									io.flush
+									io.put_string("Réservation annulée ! %N")
+								else
+									io.put_string("Saisissez un numero de média%N")
+								end
+							else
+								io.put_string("Saisissez un numero de média%N")
 							end
 						end
 					else
@@ -918,7 +938,7 @@ feature{ANY}
 			ajout : BOOLEAN
 			correct : BOOLEAN
 			compteur : INTEGER
-			choix : INTEGER
+			choix : STRING
 			identifiant : STRING
 			ajouter_ds_media : STRING
 		do
@@ -931,14 +951,12 @@ feature{ANY}
 			io.put_string("%N")
 			correct := False
 			compteur := 1
+			choix := ""
 			from
 			until correct or compteur = 4
 			loop
 				io.put_string("Identifiant de l'utilisateur : %N")
 				io.flush
-				if compteur = 1 then
-					io.read_line
-				end
 				io.read_line
 				identifiant := io.last_string
 				from i := 0
@@ -978,42 +996,46 @@ feature{ANY}
 					loop
 						io.put_string("Quelle réservation devient un emprunt ? (Saisissez son numéro)%N")
 						io.flush
-						io.read_integer
-						choix := io.last_integer
-						if choix > 0 and choix <= i then
-							correct := True
-							reservation := utilisateur.get_lst_reservations.item(choix-1)							
-							create emprunt.make
-							emprunt.set_numero(generer_numero)
-							emprunt.set_user(utilisateur)
-							if reservation.get_dvd /= Void then
-								emprunt.set_dvd(reservation.get_dvd)
-							else
-								emprunt.set_livre(reservation.get_livre)
-							end
-							ajouter_ds_media := ajouter_emprunt_liste_medias(emprunt)
-							if ajouter_ds_media.is_equal("FAIT") then
-								io.put_string("L'utilisateur emprunte déjà ce média")
-							elseif ajouter_ds_media.is_equal("NON") then
-								io.put_string("Le média n'est pas disponible pour l'emprunt")
-							else
-							ajout := utilisateur.ajouter_emprunt(emprunt)
-								if not ajout then
-									io.put_string("L'utilisateur ne peut pas emprunter plus %N")
+						io.read_line
+						choix.copy(io.last_string)
+						if choix.is_integer then
+							if choix.to_integer > 0 and choix.to_integer <= i then
+								correct := True
+								reservation := utilisateur.get_lst_reservations.item(choix.to_integer-1)							
+								create emprunt.make
+								emprunt.set_numero(generer_numero)
+								emprunt.set_user(utilisateur)
+								if reservation.get_dvd /= Void then
+									emprunt.set_dvd(reservation.get_dvd)
 								else
-									supprimer_reservation_fichier(reservation)
-									utilisateur.get_lst_reservations.remove(choix-1)
-									supprimer_reservation_liste_medias(reservation)
-									create fichier_emprunt.make
-									fichier_emprunt.connect_for_appending_to("emprunts.txt")
-									fichier_emprunt.put_line(emprunt.format_enregistrement)
-									fichier_emprunt.disconnect
-									io.put_string("Emprunt réalisé ! %N")
+									emprunt.set_livre(reservation.get_livre)
 								end
-							end
+								ajouter_ds_media := ajouter_emprunt_liste_medias(emprunt)
+								if ajouter_ds_media.is_equal("FAIT") then
+									io.put_string("L'utilisateur emprunte déjà ce média")
+								elseif ajouter_ds_media.is_equal("NON") then
+									io.put_string("Le média n'est pas disponible pour l'emprunt")
+								else
+									ajout := utilisateur.ajouter_emprunt(emprunt)
+									if not ajout then
+										io.put_string("L'utilisateur ne peut pas emprunter plus %N")
+									else
+										supprimer_reservation_fichier(reservation)
+										utilisateur.get_lst_reservations.remove(choix.to_integer-1)
+										supprimer_reservation_liste_medias(reservation)
+										create fichier_emprunt.make
+										fichier_emprunt.connect_for_appending_to("emprunts.txt")
+										fichier_emprunt.put_line(emprunt.format_enregistrement)
+										fichier_emprunt.disconnect
+										io.put_string("Emprunt réalisé ! %N")
+									end
+								end
+							else
+								io.put_string("Saisissez un numero de média%N")
+							end -- choix correct
 						else
-							io.put_string("Le média n'existe pas %N")
-						end -- choix correct
+							io.put_string("Saisissez un numero de média%N")
+						end
 					
 					
 					end -- loop correct
@@ -1216,9 +1238,10 @@ feature{ANY}
 	gerer_emprunts_reservations_admin is
 		local
 			continuer : BOOLEAN
-			choix_gestion : INTEGER
+			choix_gestion : STRING
 		do
 			continuer := True
+			choix_gestion := ""
 			from
 			until not continuer
 			loop
@@ -1237,22 +1260,26 @@ feature{ANY}
 				io.put_string("5. Réaliser un emprunt à partir d'une réservation %N")
 				io.put_string("6. Retour %N")
 				io.flush
-				io.read_integer
-				choix_gestion := io.last_integer
-				if choix_gestion > 0 and choix_gestion < 7 then
-					inspect choix_gestion
-					when 1 then 
-						afficher_utilisateurs_et_reservation
-					when 2 then
-						afficher_utilisateurs_et_emprunts
-					when 3 then
-						retourner_emprunt
-					when 4 then 
-						annuler_reservation_admin
-					when 5 then
-						transformer_reservation_emprunt
-					when 6 then
-						continuer := False
+				io.read_line
+				choix_gestion.copy(io.last_string)
+				if choix_gestion.is_integer then
+					if choix_gestion.to_integer > 0 and choix_gestion.to_integer < 7 then
+						inspect choix_gestion.to_integer
+						when 1 then 
+							afficher_utilisateurs_et_reservation
+						when 2 then
+							afficher_utilisateurs_et_emprunts
+						when 3 then
+							retourner_emprunt
+						when 4 then 
+							annuler_reservation_admin
+						when 5 then
+							transformer_reservation_emprunt
+						when 6 then
+							continuer := False
+						end
+					else
+						io.put_string("Saississez un nombre compris entre 1 et 4 %N")
 					end
 				else
 					io.put_string("Saississez un nombre compris entre 1 et 4 %N")
